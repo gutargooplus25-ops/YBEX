@@ -1,0 +1,6 @@
+/* Theme variables — consumed via Tailwind arbitrary values */
+:root {
+  --color-bg: #000000;
+  --color-primary: #58549C;
+  --color-text: #FFFFFF;
+}
