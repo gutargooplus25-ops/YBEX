@@ -170,10 +170,40 @@ export default function Navbar() {
 
         {/* CTA */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }} className="hidden-mobile">
-          {user ? (
-            <button onClick={logout} className="btn-outline" style={{ padding: '0.5rem 1.25rem' }}>
-              Logout
-            </button>
+          {user?.role === 'admin' ? (
+            <>
+              <Link
+                to="/admin/dashboard"
+                style={{
+                  padding: '0.5rem 1.25rem',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  color: '#ff4500',
+                  border: '1px solid rgba(255,69,0,0.4)',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  transition: 'all 0.2s ease',
+                  background: 'rgba(255,69,0,0.08)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,69,0,0.18)';
+                  e.currentTarget.style.borderColor = '#ff4500';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,69,0,0.08)';
+                  e.currentTarget.style.borderColor = 'rgba(255,69,0,0.4)';
+                }}
+              >
+                Admin Panel
+              </Link>
+              <button
+                onClick={logout}
+                className="btn-outline"
+                style={{ padding: '0.5rem 1.25rem' }}
+              >
+                Logout
+              </button>
+            </>
           ) : (
             <Link to="/get-started" className="btn-primary" style={{ padding: '0.5rem 1.25rem' }}>
               Get Started
@@ -229,9 +259,47 @@ export default function Navbar() {
               {label}
             </Link>
           ))}
-          <Link to="/get-started" className="btn-primary" style={{ marginTop: '1rem', justifyContent: 'center' }}>
-            Get Started
-          </Link>
+          {user?.role === 'admin' ? (
+            <>
+              <Link
+                to="/admin/dashboard"
+                style={{
+                  marginTop: '1rem',
+                  padding: '0.75rem 1rem',
+                  color: '#ff4500',
+                  fontSize: '0.95rem',
+                  fontWeight: 600,
+                  border: '1px solid rgba(255,69,0,0.4)',
+                  borderRadius: '8px',
+                  background: 'rgba(255,69,0,0.08)',
+                  textAlign: 'center',
+                }}
+              >
+                Admin Panel
+              </Link>
+              <button
+                onClick={logout}
+                style={{
+                  marginTop: '0.5rem',
+                  padding: '0.75rem 1rem',
+                  color: 'rgba(255,255,255,0.75)',
+                  fontSize: '0.95rem',
+                  fontWeight: 500,
+                  background: 'none',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  width: '100%',
+                }}
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link to="/get-started" className="btn-primary" style={{ marginTop: '1rem', justifyContent: 'center' }}>
+              Get Started
+            </Link>
+          )}
         </div>
       )}
 

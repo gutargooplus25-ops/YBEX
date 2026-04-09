@@ -20,3 +20,15 @@ export const deleteSuggestion = (id) => axiosInstance.delete(`/suggestions/${id}
 
 // Contact
 export const submitContact = (data) => axiosInstance.post('/contact', data);
+
+// Admin
+export const getAdminStats = () => axiosInstance.get('/admin/stats');
+export const getAdminContacts = (params) => axiosInstance.get('/admin/contacts', { params });
+export const updateAdminContact = (id, data) => axiosInstance.patch(`/admin/contacts/${id}`, data);
+export const deleteAdminContact = (id) => axiosInstance.delete(`/admin/contacts/${id}`);
+export const getAdminUsers = () => axiosInstance.get('/admin/users');
+export const updateAdminUserRole = (id, role) => axiosInstance.patch(`/admin/users/${id}/role`, { role });
+export const deleteAdminUser = (id) => axiosInstance.delete(`/admin/users/${id}`);
+export const getAdminSuggestions = (params) => axiosInstance.get('/admin/suggestions', { params });
+export const updateAdminSuggestion = (id, status) => axiosInstance.patch(`/admin/suggestions/${id}`, { status });
+export const deleteAdminSuggestion = (id) => axiosInstance.delete(`/admin/suggestions/${id}`);

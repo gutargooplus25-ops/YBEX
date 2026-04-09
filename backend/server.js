@@ -9,6 +9,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const suggestionRoutes = require('./routes/suggestionRoutes');
 const contactRoutes = require('./routes/contactRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 dotenv.config();
 connectDB();
@@ -25,6 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/suggestions', suggestionRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
