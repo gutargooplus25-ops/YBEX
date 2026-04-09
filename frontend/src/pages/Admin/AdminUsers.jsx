@@ -63,7 +63,7 @@ export default function AdminUsers() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        style={{ marginBottom: '1.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}
+        style={{ marginBottom: '1.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}
       >
         <div>
           <h1 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#fff', marginBottom: '0.2rem', letterSpacing: '-0.02em' }}>
@@ -99,7 +99,7 @@ export default function AdminUsers() {
               background: 'rgba(255,255,255,0.05)',
               border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: '10px', color: '#fff', fontSize: '0.85rem',
-              outline: 'none', width: '270px', transition: 'border-color 0.2s, box-shadow 0.2s',
+              outline: 'none', width: '100%', maxWidth: '270px', transition: 'border-color 0.2s, box-shadow 0.2s',
             }}
             onFocus={(e) => {
               e.target.style.borderColor = '#ff4500';
@@ -144,10 +144,10 @@ export default function AdminUsers() {
           }}
         >
           {/* Table header */}
-          <div style={{
+          <div className="users-table-header" style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1.5fr 100px 130px 100px',
-            padding: '0.8rem 1.5rem',
+            padding: '0.8rem 1.25rem',
             background: 'rgba(255,255,255,0.03)',
             borderBottom: '1px solid rgba(255,255,255,0.07)',
             fontSize: '0.68rem', fontWeight: 800,
@@ -182,10 +182,11 @@ export default function AdminUsers() {
                   exit="exit"
                   layout
                   whileHover={{ background: 'rgba(255,255,255,0.025)' }}
+                  className="users-table-row"
                   style={{
                     display: 'grid',
                     gridTemplateColumns: '1fr 1.5fr 100px 130px 100px',
-                    padding: '1rem 1.5rem',
+                    padding: '1rem 1.25rem',
                     borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
                     alignItems: 'center',
                   }}
@@ -195,29 +196,29 @@ export default function AdminUsers() {
                     <motion.div
                       whileHover={{ scale: 1.1 }}
                       style={{
-                        width: '34px', height: '34px', borderRadius: '50%',
+                        width: '32px', height: '32px', borderRadius: '50%',
                         background: user.role === 'admin' ? 'rgba(255,69,0,0.18)' : 'rgba(255,255,255,0.07)',
                         border: user.role === 'admin' ? '1px solid rgba(255,69,0,0.45)' : '1px solid rgba(255,255,255,0.1)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '0.8rem', fontWeight: 800,
+                        fontSize: '0.78rem', fontWeight: 800,
                         color: user.role === 'admin' ? '#ff4500' : 'rgba(255,255,255,0.55)',
                         flexShrink: 0,
                       }}
                     >
                       {user.name.charAt(0).toUpperCase()}
                     </motion.div>
-                    <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#fff' }}>{user.name}</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.name}</span>
                   </div>
 
                   {/* Email */}
-                  <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.45)' }}>{user.email}</span>
+                  <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</span>
 
                   {/* Role */}
                   <motion.span
                     layout
                     style={{
                       display: 'inline-flex', alignItems: 'center',
-                      padding: '0.2rem 0.65rem', borderRadius: '20px', fontSize: '0.68rem', fontWeight: 800,
+                      padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.65rem', fontWeight: 800,
                       background: user.role === 'admin' ? 'rgba(255,69,0,0.15)' : 'rgba(255,255,255,0.07)',
                       color: user.role === 'admin' ? '#ff4500' : 'rgba(255,255,255,0.45)',
                       letterSpacing: '0.06em', textTransform: 'uppercase',
@@ -228,7 +229,7 @@ export default function AdminUsers() {
                   </motion.span>
 
                   {/* Joined */}
-                  <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.3)' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)' }}>
                     {formatDate(user.createdAt)}
                   </span>
 
@@ -240,12 +241,12 @@ export default function AdminUsers() {
                       onClick={() => handleRoleToggle(user._id, user.role)}
                       title={user.role === 'admin' ? 'Demote to user' : 'Promote to admin'}
                       style={{
-                        width: '32px', height: '32px',
+                        width: '30px', height: '30px',
                         background: 'rgba(255,255,255,0.05)',
                         border: '1px solid rgba(255,255,255,0.1)',
                         borderRadius: '7px', cursor: 'pointer',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '0.85rem',
+                        fontSize: '0.82rem',
                       }}
                     >
                       {user.role === 'admin' ? '👤' : '⭐'}
@@ -256,12 +257,12 @@ export default function AdminUsers() {
                       onClick={() => handleDelete(user._id)}
                       title="Delete user"
                       style={{
-                        width: '32px', height: '32px',
+                        width: '30px', height: '30px',
                         background: 'rgba(255,69,0,0.08)',
                         border: '1px solid rgba(255,69,0,0.2)',
                         borderRadius: '7px', cursor: 'pointer',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '0.85rem',
+                        fontSize: '0.82rem',
                       }}
                     >
                       🗑
@@ -273,6 +274,23 @@ export default function AdminUsers() {
           </AnimatePresence>
         </motion.div>
       )}
+
+      <style>{`
+        @media (max-width: 640px) {
+          .users-table-header { display: none !important; }
+          .users-table-row {
+            grid-template-columns: 1fr !important;
+            gap: 0.5rem !important;
+            padding: 1rem !important;
+          }
+        }
+        @media (min-width: 641px) and (max-width: 900px) {
+          .users-table-header { grid-template-columns: 1fr 1.2fr 90px 90px !important; }
+          .users-table-row { grid-template-columns: 1fr 1.2fr 90px 90px !important; }
+          .users-table-row > span:nth-child(4) { display: none; }
+          .users-table-header > span:nth-child(4) { display: none; }
+        }
+      `}</style>
     </AdminLayout>
   );
 }

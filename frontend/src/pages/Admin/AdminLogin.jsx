@@ -92,7 +92,7 @@ export default function AdminLogin() {
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        style={{ width: '100%', maxWidth: '440px', padding: '0 1.5rem', position: 'relative', zIndex: 1 }}
+        style={{ width: '100%', maxWidth: '440px', padding: '0 1rem', position: 'relative', zIndex: 1 }}
       >
         {/* Logo */}
         <motion.div
@@ -139,7 +139,7 @@ export default function AdminLogin() {
             background: 'rgba(255,255,255,0.03)',
             border: '1px solid rgba(255,255,255,0.08)',
             borderRadius: '20px',
-            padding: '2.5rem',
+            padding: 'clamp(1.5rem, 5vw, 2.5rem)',
             backdropFilter: 'blur(20px)',
           }}
         >

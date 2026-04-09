@@ -137,7 +137,7 @@ export default function AdminDashboard() {
             transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
             style={{ fontSize: '1.5rem' }}
           >👋</motion.div>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: 'clamp(1.1rem, 4vw, 1.6rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em' }}>
             Welcome back, <span style={{ color: '#ff4500' }}>{user?.name || 'Admin'}</span>
           </h1>
         </motion.div>
@@ -158,8 +158,8 @@ export default function AdminDashboard() {
           animate={{ opacity: 1 }}
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-            gap: '1rem',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+            gap: '0.75rem',
           }}
         >
           {[...Array(5)].map((_, i) => (
@@ -168,7 +168,7 @@ export default function AdminDashboard() {
               animate={{ opacity: [0.3, 0.6, 0.3] }}
               transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.15 }}
               style={{
-                height: '140px', borderRadius: '16px',
+                height: '130px', borderRadius: '16px',
                 background: 'rgba(255,255,255,0.04)',
                 border: '1px solid rgba(255,255,255,0.06)',
               }}
@@ -182,8 +182,8 @@ export default function AdminDashboard() {
           animate="show"
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-            gap: '1rem',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+            gap: '0.75rem',
           }}
         >
           {statCards.map((card, i) => (

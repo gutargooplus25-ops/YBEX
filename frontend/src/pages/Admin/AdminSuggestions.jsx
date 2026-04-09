@@ -196,7 +196,7 @@ export default function AdminSuggestions() {
                       borderRadius: '14px', padding: '1.25rem 1.5rem',
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         {/* Category + date */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.65rem', flexWrap: 'wrap' }}>

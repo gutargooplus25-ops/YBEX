@@ -93,13 +93,14 @@ export default function AdminEnquiries() {
 
   return (
     <AdminLayout>
-      <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+      <div className="enquiries-layout" style={{ display: 'flex', gap: '1.25rem', alignItems: 'flex-start' }}>
         {/* Sidebar */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          style={{ width: '220px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '0.35rem' }}
+          className="enquiries-sidebar"
+          style={{ width: '200px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '0.35rem' }}
         >
           {CATEGORIES.map((cat, i) => {
             const isActive = activeCategory === cat.key;
@@ -328,6 +329,16 @@ export default function AdminEnquiries() {
           </AnimatePresence>
         </div>
       </div>
+      <style>{`
+        @media (max-width: 640px) {
+          .enquiries-layout { flex-direction: column !important; }
+          .enquiries-sidebar { width: 100% !important; flex-direction: row !important; flex-wrap: wrap !important; }
+          .enquiries-sidebar button { flex: 1 1 calc(50% - 0.2rem) !important; min-width: 0 !important; }
+        }
+        @media (min-width: 641px) and (max-width: 900px) {
+          .enquiries-sidebar { width: 160px !important; }
+        }
+      `}</style>
     </AdminLayout>
   );
 }
