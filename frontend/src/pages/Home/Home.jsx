@@ -1,56 +1,118 @@
-import Layout from '../../components/layout/Layout';
+// src/pages/home/Home.jsx
 import HeroSection from './HeroSection';
 import StatsSection from './StatsSection';
 import { Link } from 'react-router-dom';
 
 const features = [
-  { icon: '🎨', title: 'Brand Identity', desc: 'We craft brands that stand out and tell your story with clarity.' },
-  { icon: '💻', title: 'Web & App Dev', desc: 'Fast, scalable, and beautiful digital products built to convert.' },
-  { icon: '📈', title: 'Growth Strategy', desc: 'Data-driven marketing and strategy to accelerate your growth.' },
-  { icon: '🎓', title: 'Creator Academy', desc: 'Learn from experts and build skills that matter in today\'s world.' },
+  { icon: '🎯', title: 'Influencer Marketing', desc: 'Connect with top creators who authentically amplify your brand.' },
+  { icon: '📊', title: 'Data-Driven Strategy', desc: 'Leverage analytics to maximize ROI and measure real impact.' },
+  { icon: '✨', title: 'Premium Branding', desc: 'Craft a distinctive brand identity that stands out.' },
+  { icon: '🚀', title: 'Growth Acceleration', desc: 'Scale your reach with proven strategies for sustainable growth.' },
 ];
 
 export default function Home() {
   return (
-    <Layout>
+    <>
       <HeroSection />
       <StatsSection />
 
-      {/* Features */}
-      <section style={{ padding: '5rem 1.5rem', backgroundColor: 'rgba(88,84,156,0.04)' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-            <span className="badge">What We Do</span>
-            <h2 className="section-title">Everything you need to grow</h2>
-            <p className="section-sub">From brand identity to digital growth — we've got you covered end to end.</p>
+      {/* Features Section */}
+      <section className="section">
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.5rem 1.5rem',
+              background: 'rgba(88, 84, 156, 0.12)',
+              border: '1px solid rgba(88, 84, 156, 0.35)',
+              borderRadius: '50px',
+              fontSize: '0.85rem',
+              color: '#b8b4e0',
+              marginBottom: '1.5rem',
+            }}>
+              <span>⚡</span>
+              What We Do
+            </div>
+            
+            <h2 style={{
+              fontSize: 'clamp(2rem, 4vw, 3rem)',
+              fontWeight: 800,
+              color: '#ffffff',
+              marginBottom: '1rem',
+              background: 'linear-gradient(135deg, #fff 0%, #d0d0ff 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>
+              Everything you need to grow
+            </h2>
+            
+            <p style={{
+              fontSize: '1.1rem',
+              color: 'rgba(255, 255, 255, 0.65)',
+              maxWidth: '600px',
+              margin: '0 auto',
+              lineHeight: 1.7,
+            }}>
+              From influencer partnerships to data-driven strategy — we've got you covered end to end.
+            </p>
           </div>
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
             gap: '1.5rem',
           }}>
-            {features.map(({ icon, title, desc }, i) => (
-              <div
-                key={title}
-                className="card animate-fade-up"
-                style={{ padding: '2rem', opacity: 0, animationDelay: `${i * 100}ms` }}
+            {features.map((feature, i) => (
+              <div 
+                key={feature.title} 
+                style={{
+                  padding: '1.5rem',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(88, 84, 156, 0.2)',
+                  borderRadius: '16px',
+                  backdropFilter: 'blur(16px)',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-6px)';
+                  e.currentTarget.style.borderColor = 'rgba(88, 84, 156, 0.6)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.borderColor = 'rgba(88, 84, 156, 0.2)';
+                }}
               >
                 <div style={{
-                  width: '52px', height: '52px',
-                  backgroundColor: 'rgba(88,84,156,0.2)',
+                  width: '50px',
+                  height: '50px',
+                  background: 'linear-gradient(135deg, rgba(88, 84, 156, 0.2) 0%, rgba(88, 84, 156, 0.1) 100%)',
                   borderRadius: '12px',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   fontSize: '1.5rem',
-                  marginBottom: '1.25rem',
+                  marginBottom: '1rem',
                 }}>
-                  {icon}
+                  {feature.icon}
                 </div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff', marginBottom: '0.5rem' }}>
-                  {title}
+                
+                <h3 style={{
+                  fontSize: '1.1rem',
+                  fontWeight: 700,
+                  color: '#ffffff',
+                  marginBottom: '0.5rem',
+                }}>
+                  {feature.title}
                 </h3>
-                <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7 }}>
-                  {desc}
+                
+                <p style={{
+                  fontSize: '0.9rem',
+                  color: 'rgba(255, 255, 255, 0.65)',
+                  lineHeight: 1.6,
+                }}>
+                  {feature.desc}
                 </p>
               </div>
             ))}
@@ -58,36 +120,56 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Banner */}
-      <section style={{ padding: '5rem 1.5rem' }}>
-        <div style={{
-          maxWidth: '800px',
-          margin: '0 auto',
-          textAlign: 'center',
-          padding: '4rem 2rem',
-          background: 'linear-gradient(135deg, rgba(88,84,156,0.2) 0%, rgba(88,84,156,0.05) 100%)',
-          border: '1px solid rgba(88,84,156,0.3)',
-          borderRadius: '1.5rem',
-          position: 'relative',
-          overflow: 'hidden',
-        }}>
+      {/* CTA */}
+      <section className="section" style={{ backgroundColor: 'rgba(88, 84, 156, 0.02)' }}>
+        <div className="container">
           <div style={{
-            position: 'absolute', top: '-50px', right: '-50px',
-            width: '200px', height: '200px',
-            background: 'radial-gradient(circle, rgba(88,84,156,0.3) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          }} />
-          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 800, color: '#ffffff', marginBottom: '1rem' }}>
-            Ready to build something great?
-          </h2>
-          <p style={{ color: 'rgba(255,255,255,0.55)', marginBottom: '2rem', fontSize: '1.05rem' }}>
-            Join hundreds of brands and creators who trust YBEX to grow their vision.
-          </p>
-          <Link to="/get-started" className="btn-primary" style={{ padding: '0.875rem 2.5rem', fontSize: '1rem' }}>
-            Start Today
-          </Link>
+            maxWidth: '800px',
+            margin: '0 auto',
+            padding: '3rem',
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(88, 84, 156, 0.2)',
+            borderRadius: '20px',
+            textAlign: 'center',
+          }}>
+            <h2 style={{
+              fontSize: 'clamp(2rem, 4vw, 3rem)',
+              fontWeight: 800,
+              color: '#ffffff',
+              marginBottom: '1.5rem',
+              background: 'linear-gradient(135deg, #fff 0%, #d0d0ff 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>
+              Ready to build something extraordinary?
+            </h2>
+            
+            <p style={{
+              fontSize: '1.1rem',
+              color: 'rgba(255, 255, 255, 0.7)',
+              marginBottom: '2rem',
+            }}>
+              Join hundreds of brands who trust YBEX to amplify their vision with data-driven influencer marketing.
+            </p>
+            
+            <Link 
+              to="/get-started" 
+              style={{
+                padding: '1rem 2rem',
+                background: 'linear-gradient(135deg, #58549C, #6a67b8)',
+                color: 'white',
+                borderRadius: '12px',
+                textDecoration: 'none',
+                fontWeight: 600,
+                boxShadow: '0 8px 30px rgba(88, 84, 156, 0.4)',
+                transition: 'all 0.3s ease',
+              }}
+            >
+              Start Your Journey
+            </Link>
+          </div>
         </div>
       </section>
-    </Layout>
+    </>
   );
 }
