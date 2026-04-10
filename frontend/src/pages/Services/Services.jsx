@@ -1,71 +1,59 @@
-import Layout from '../../components/layout/Layout';
 import { Link } from 'react-router-dom';
-
-const services = [
-  { icon: '🎨', title: 'Brand Identity',     desc: 'Logo, color palette, typography, and full brand guidelines that make you unforgettable.' },
-  { icon: '💻', title: 'Web Development',    desc: 'Fast, responsive, and scalable websites and web apps built with modern tech.' },
-  { icon: '📈', title: 'Digital Marketing',  desc: 'SEO, paid ads, social media, and content strategy that drives real results.' },
-  { icon: '🎬', title: 'Video Production',   desc: 'High-quality video content for brands, creators, and product launches.' },
-  { icon: '✏️', title: 'UI/UX Design',       desc: 'User-centered design that converts visitors into loyal customers.' },
-  { icon: '🧠', title: 'Strategy & Consulting', desc: 'Expert guidance to help you make smarter business decisions faster.' },
-];
+import { motion } from 'motion/react';
+import { services } from '../../content/siteData';
 
 export default function Services() {
   return (
-    <Layout>
-      <section style={{ padding: '6rem 1.5rem', position: 'relative', overflow: 'hidden' }}>
-        <div style={{
-          position: 'absolute', top: '10%', right: '-100px',
-          width: '400px', height: '400px',
-          background: 'radial-gradient(circle, rgba(88,84,156,0.15) 0%, transparent 70%)',
-          pointerEvents: 'none',
-        }} />
+    <section className="page-shell">
+      <div className="container">
+        <motion.div className="section-heading page-heading" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+          <p className="eyebrow">Services</p>
+          <h1>Creative systems designed to make your brand look sharper, move better, and convert harder.</h1>
+          <p className="section-copy">
+            We shape the full experience: visual tone, motion hierarchy, campaign storytelling, and the front-end build that brings it together.
+          </p>
+        </motion.div>
 
-        <div style={{ textAlign: 'center', marginBottom: '4rem' }} className="animate-fade-up">
-          <span className="badge">What We Do</span>
-          <h1 className="section-title">Services</h1>
-          <p className="section-sub">End-to-end solutions to build, launch, and grow your brand.</p>
-        </div>
-
-        <div style={{
-          maxWidth: '1100px',
-          margin: '0 auto',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '1.5rem',
-        }}>
-          {services.map(({ icon, title, desc }, i) => (
-            <div
-              key={title}
-              className="card animate-fade-up"
-              style={{ padding: '2rem', opacity: 0, animationDelay: `${i * 100}ms` }}
+        <div className="feature-grid">
+          {services.map((service, index) => (
+            <motion.article
+              key={service.title}
+              className="feature-card"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.65, delay: index * 0.08 }}
             >
-              <div style={{
-                width: '52px', height: '52px',
-                backgroundColor: 'rgba(88,84,156,0.18)',
-                borderRadius: '12px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '1.5rem',
-                marginBottom: '1.25rem',
-              }}>
-                {icon}
-              </div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ffffff', marginBottom: '0.6rem' }}>
-                {title}
-              </h3>
-              <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.75 }}>
-                {desc}
-              </p>
-            </div>
+              <p>{service.eyebrow}</p>
+              <h3>{service.title}</h3>
+              <span>{service.description}</span>
+            </motion.article>
           ))}
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: '4rem' }}>
-          <Link to="/contact" className="btn-primary" style={{ padding: '0.875rem 2.5rem', fontSize: '1rem' }}>
-            Discuss Your Project
+        <motion.div className="detail-grid" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }}>
+          <div className="detail-panel">
+            <p className="eyebrow">Process</p>
+            <h2>From reference moodboards to polished launch flows.</h2>
+            <span>
+              We start with narrative and audience intent, then define visual direction, section pacing, content priorities, and motion rules before development begins.
+            </span>
+          </div>
+          <div className="detail-panel">
+            <p className="eyebrow">Output</p>
+            <h2>Pages that feel editorial, animated, and conversion-aware.</h2>
+            <span>
+              Every build is designed to hold attention with strong hierarchy while still staying easy to navigate on desktop and mobile.
+            </span>
+          </div>
+        </motion.div>
+
+        <div className="page-cta">
+          <Link to="/contact" className="button button-primary">
+            Discuss your project
           </Link>
         </div>
-      </section>
-    </Layout>
+      </div>
+    </section>
   );
 }

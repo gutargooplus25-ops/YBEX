@@ -23,7 +23,7 @@ export default function HeroSection() {
         playsInline
         className="hero-video"
       >
-        <source src="/video.mp4" type="video/mp4" />
+        <source src="/videobg.mp4" type="video/mp4" />
         {/* Fallback for no video */}
         <div style={{
           position: 'absolute',

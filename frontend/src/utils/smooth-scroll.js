@@ -13,7 +13,7 @@ export const initSmoothScroll = () => {
   });
 
   function raf(time) {
-    lenis.raf(time);z
+    lenis.raf(time);
     requestAnimationFrame(raf);
   }
   requestAnimationFrame(raf);

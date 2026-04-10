@@ -1,17 +1,22 @@
 import { useState } from 'react';
-import Layout from '../../components/layout/Layout';
+import { motion } from 'motion/react';
 import { submitContact } from '../../api/api';
+import { contactDetails } from '../../content/siteData';
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (event) => {
+    setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
+  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setLoading(true);
+    setStatus(null);
+
     try {
       await submitContact(form);
       setStatus('success');
@@ -24,85 +29,38 @@ export default function Contact() {
   };
 
   return (
-    <Layout>
-      <section style={{ padding: '6rem 1.5rem', position: 'relative', overflow: 'hidden' }}>
-        <div style={{
-          position: 'absolute', top: '10%', left: '-80px',
-          width: '350px', height: '350px',
-          background: 'radial-gradient(circle, rgba(88,84,156,0.15) 0%, transparent 70%)',
-          pointerEvents: 'none',
-        }} />
-
-        <div style={{ maxWidth: '640px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <div style={{ textAlign: 'center', marginBottom: '3rem' }} className="animate-fade-up">
-            <span className="badge">Get In Touch</span>
-            <h1 className="section-title">Contact Us</h1>
-            <p className="section-sub">Have a project in mind? We'd love to hear from you.</p>
-          </div>
-
-          <div className="card animate-fade-up" style={{ padding: '2.5rem', opacity: 0, animationDelay: '100ms' }}>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <input
-                  name="name"
-                  placeholder="Your Name"
-                  value={form.name}
-                  onChange={handleChange}
-                  required
-                  className="input-field"
-                />
-                <input
-                  name="email"
-                  type="email"
-                  placeholder="Your Email"
-                  value={form.email}
-                  onChange={handleChange}
-                  required
-                  className="input-field"
-                />
+    <section className="page-shell">
+      <div className="container contact-layout">
+        <motion.div className="section-heading align-left" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+          <p className="eyebrow">Contact</p>
+          <h1>Ready to turn your current frontend into something people remember?</h1>
+          <p className="section-copy">
+            Share your goals, references, launch timeline, and what feels broken today. We will shape the next version with you.
+          </p>
+          <div className="contact-list">
+            {contactDetails.map((item) => (
+              <div key={item.label} className="contact-item">
+                <span>{item.label}</span>
+                <strong>{item.value}</strong>
               </div>
-              <input
-                name="subject"
-                placeholder="Subject"
-                value={form.subject}
-                onChange={handleChange}
-                required
-                className="input-field"
-              />
-              <textarea
-                name="message"
-                placeholder="Your Message"
-                value={form.message}
-                onChange={handleChange}
-                required
-                rows={6}
-                className="input-field"
-                style={{ resize: 'none' }}
-              />
-
-              {status === 'success' && (
-                <p style={{ color: '#4ade80', fontSize: '0.875rem', textAlign: 'center' }}>
-                  ✓ Message sent successfully!
-                </p>
-              )}
-              {status === 'error' && (
-                <p style={{ color: '#f87171', fontSize: '0.875rem', textAlign: 'center' }}>
-                  ✗ Failed to send. Please try again.
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="btn-primary"
-                style={{ padding: '0.875rem', justifyContent: 'center', fontSize: '0.95rem', opacity: loading ? 0.6 : 1 }}
-              >
-                {loading ? 'Sending...' : 'Send Message'}
-              </button>
-            </form>
+            ))}
           </div>
-        </div>
-      </section>
-    </Layout>
+        </motion.div>
+
+        <motion.form className="contact-form" onSubmit={handleSubmit} initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }}>
+          <div className="form-grid">
+            <input name="name" placeholder="Your name" value={form.name} onChange={handleChange} required />
+            <input name="email" type="email" placeholder="Email address" value={form.email} onChange={handleChange} required />
+          </div>
+          <input name="subject" placeholder="Project type" value={form.subject} onChange={handleChange} required />
+          <textarea name="message" rows={7} placeholder="Tell us what you want to build" value={form.message} onChange={handleChange} required />
+          {status === 'success' && <p className="form-message success">Message sent successfully.</p>}
+          {status === 'error' && <p className="form-message error">Something went wrong while sending your message.</p>}
+          <button type="submit" className="button button-primary" disabled={loading}>
+            {loading ? 'Sending...' : 'Send enquiry'}
+          </button>
+        </motion.form>
+      </div>
+    </section>
   );
 }

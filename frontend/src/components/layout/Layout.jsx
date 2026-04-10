@@ -1,13 +1,12 @@
-// src/components/layout/Layout.jsx
 import Navbar from './Navbar';
+import Footer from './Footer';
 
 export default function Layout({ children }) {
   return (
-    <>
+    <div className="site-shell">
       <Navbar />
-      <main style={{ paddingTop: '64px' }}>
-        {children}
-      </main>
-    </>
+      <main className="site-main">{children}</main>
+      <Footer />
+    </div>
   );
 }
