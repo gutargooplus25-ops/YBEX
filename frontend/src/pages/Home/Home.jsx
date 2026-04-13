@@ -1,14 +1,20 @@
 import { Link } from 'react-router-dom';
-import { motion, useScroll, useTransform } from 'motion/react';
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+  useScroll,
+  useTransform,
+} from 'motion/react';
 import { useRef } from 'react';
 import { featuredProjects, marqueeItems, services, stats } from '../../content/siteData';
 
-const heroBadges = ['Motion Design', 'Creator Launches', 'Premium UI', 'Cinematic React'];
+const heroBadges = ['3D Motion', 'Premium UI', 'Sharper Type', 'Luxury Detail'];
 const experienceSteps = [
-  'Scroll-led pacing',
-  'Layered depth',
-  'High-contrast typography',
-  'Fluid hover feedback',
+  'Refined typography scale',
+  '3D depth with restraint',
+  'Cleaner premium hierarchy',
+  'Smooth hover and scroll motion',
 ];
 
 export default function Home() {
@@ -22,10 +28,35 @@ export default function Home() {
   const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.92]);
   const orbY = useTransform(scrollYProgress, [0, 1], [0, 180]);
   const orbLift = useTransform(scrollYProgress, [0, 1], [0, -120]);
+  const rotateX = useMotionValue(0);
+  const rotateY = useMotionValue(0);
+  const springRotateX = useSpring(rotateX, { stiffness: 120, damping: 18, mass: 0.8 });
+  const springRotateY = useSpring(rotateY, { stiffness: 120, damping: 18, mass: 0.8 });
+
+  const handleHeroPointerMove = (event) => {
+    const bounds = heroRef.current?.getBoundingClientRect();
+    if (!bounds) return;
+
+    const relativeX = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const relativeY = (event.clientY - bounds.top) / bounds.height - 0.5;
+
+    rotateX.set(relativeY * -10);
+    rotateY.set(relativeX * 12);
+  };
+
+  const resetHeroDepth = () => {
+    rotateX.set(0);
+    rotateY.set(0);
+  };
 
   return (
     <>
-      <section className="hero-cinematic" ref={heroRef}>
+      <section
+        className="hero-cinematic"
+        ref={heroRef}
+        onPointerMove={handleHeroPointerMove}
+        onPointerLeave={resetHeroDepth}
+      >
         <motion.div className="hero-video-shell" style={{ y: heroY, scale: heroScale }}>
           <video className="hero-video" autoPlay muted loop playsInline>
             <source src="/video.mp4" type="video/mp4" />
@@ -33,6 +64,7 @@ export default function Home() {
           <div className="hero-video-overlay" />
         </motion.div>
 
+        <div className="hero-depth-grid" />
         <motion.div className="hero-light hero-light-left" style={{ y: orbY }} />
         <motion.div className="hero-light hero-light-right" style={{ y: orbLift }} />
 
@@ -45,14 +77,15 @@ export default function Home() {
           >
             <span className="hero-kicker">YBEX Creative Motion Studio</span>
             <h1 className="hero-display">
-              Smooth,
+              Premium,
               <br />
-              cinematic,
+              motion-led,
               <br />
-              award-style web design.
+              web presence.
             </h1>
             <p className="hero-lead">
-              Built to feel premium from the first frame with motion, depth, video, and a sharper visual rhythm.
+              We refined the interface with calmer typography, cinematic depth, and tasteful
+              3D motion so the brand feels professional, modern, and high value.
             </p>
 
             <div className="hero-cta-row">
@@ -60,7 +93,7 @@ export default function Home() {
                 Start Your Project
               </Link>
               <Link to="/portfolio" className="button button-secondary">
-                View Showreel Style Work
+                Explore Portfolio
               </Link>
             </div>
 
@@ -77,26 +110,42 @@ export default function Home() {
                 </motion.span>
               ))}
             </div>
+
+            <div className="hero-metrics">
+              <div className="hero-metric">
+                <strong>3D</strong>
+                <span>layered hero interactions</span>
+              </div>
+              <div className="hero-metric">
+                <strong>Clean</strong>
+                <span>more balanced type hierarchy</span>
+              </div>
+              <div className="hero-metric">
+                <strong>Premium</strong>
+                <span>presentation across desktop and mobile</span>
+              </div>
+            </div>
           </motion.div>
 
           <motion.div
             className="hero-visual-stack"
+            style={{ rotateX: springRotateX, rotateY: springRotateY }}
             initial={{ opacity: 0, y: 56 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.12, duration: 1 }}
           >
             <motion.div
               className="hero-floating-card hero-card-primary"
-              animate={{ y: [0, -12, 0] }}
+              animate={{ y: [0, -14, 0], rotateZ: [0, -1.5, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <span>Creative launch system</span>
-              <strong>Video, glow, movement, and a clear luxury feel.</strong>
+              <span>Visual direction</span>
+              <strong>Controlled glow, glass surfaces, and depth that feels expensive.</strong>
             </motion.div>
 
             <motion.div
               className="hero-monitor"
-              whileHover={{ rotateX: -3, rotateY: 6, scale: 1.02 }}
+              whileHover={{ rotateX: -6, rotateY: 10, z: 18, scale: 1.02 }}
               transition={{ type: 'spring', stiffness: 160, damping: 18 }}
             >
               <div className="hero-monitor-top">
@@ -109,19 +158,24 @@ export default function Home() {
                   <source src="/video.mp4" type="video/mp4" />
                 </video>
                 <div className="hero-monitor-ui">
-                  <p>YBEX Motion Campaign</p>
-                  <strong>Immersive web experience</strong>
+                  <p>YBEX Studio Interface</p>
+                  <strong>Professional, immersive, premium</strong>
+                </div>
+                <div className="hero-monitor-stats">
+                  <span>3D scene</span>
+                  <span>Responsive layout</span>
+                  <span>Elegant motion</span>
                 </div>
               </div>
             </motion.div>
 
             <motion.div
               className="hero-floating-card hero-card-secondary"
-              animate={{ y: [0, 14, 0] }}
+              animate={{ y: [0, 14, 0], rotateZ: [0, 1.5, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <span>Experience score</span>
-              <strong>Designed to feel alive on every scroll.</strong>
+              <span>Typography reset</span>
+              <strong>Less oversized text, more rhythm, contrast, and clarity.</strong>
             </motion.div>
           </motion.div>
         </div>
@@ -164,9 +218,12 @@ export default function Home() {
             transition={{ duration: 0.8 }}
           >
             <p className="eyebrow">Better visual experience</p>
-            <h2 className="section-title-big">Less text. More feeling. More motion. More polish.</h2>
+            <h2 className="section-title-big">
+              A sharper visual system with depth, restraint, and confidence.
+            </h2>
             <p className="section-copy">
-              This version shifts the focus from heavy copy to mood, contrast, motion layers, and a cleaner professional presentation.
+              The updated direction removes the oversized feel and replaces it with better
+              proportion, softer pacing, and a more polished premium finish.
             </p>
 
             <div className="experience-steps">
@@ -220,7 +277,9 @@ export default function Home() {
             transition={{ duration: 0.75 }}
           >
             <p className="eyebrow">Creative services</p>
-            <h2 className="section-title-big">Built as a premium visual system, not a static company website.</h2>
+            <h2 className="section-title-big">
+              Built like a premium digital brand, not a loud template.
+            </h2>
           </motion.div>
 
           <div className="service-ribbon">
@@ -253,7 +312,9 @@ export default function Home() {
             transition={{ duration: 0.75 }}
           >
             <p className="eyebrow">Selected work</p>
-            <h2 className="section-title-big">Showcase cards that feel like campaign frames.</h2>
+            <h2 className="section-title-big">
+              Showcase panels with more depth and a cleaner luxury tone.
+            </h2>
           </motion.div>
 
           <div className="project-grid project-grid-cinematic">
