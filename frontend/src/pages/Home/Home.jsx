@@ -1,365 +1,368 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, useScroll, useSpring, useTransform } from 'motion/react';
 import {
-  motion,
-  useMotionValue,
-  useSpring,
-  useScroll,
-  useTransform,
-} from 'motion/react';
-import { useRef } from 'react';
-import { featuredProjects, marqueeItems, services, stats } from '../../content/siteData';
-
-const heroBadges = ['3D Motion', 'Premium UI', 'Sharper Type', 'Luxury Detail'];
-const experienceSteps = [
-  'Refined typography scale',
-  '3D depth with restraint',
-  'Cleaner premium hierarchy',
-  'Smooth hover and scroll motion',
-];
+  aboutHighlightCopy,
+  clientLogos,
+  heroGallery,
+  marqueeItems,
+  serviceCards,
+  serviceHighlights,
+  talentProfiles,
+} from '../../content/siteData';
 
 export default function Home() {
-  const heroRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
+  const aboutSectionRef = useRef(null);
+  const heroGalleryRef = useRef(null);
+  const heroSectionRef = useRef(null);
+  const [aboutProgress, setAboutProgress] = useState(0);
+  const [heroExpanded, setHeroExpanded] = useState(false);
+  const [heroTilt, setHeroTilt] = useState({ x: 0, y: 0 });
+
+  const { scrollYProgress: heroScrollProgress } = useScroll({
+    target: heroSectionRef,
     offset: ['start start', 'end start'],
   });
+  const heroParallax = useTransform(heroScrollProgress, [0, 1], ['0%', '14%']);
+  const heroScale = useTransform(heroScrollProgress, [0, 1], [1, 0.92]);
+  const springRotateX = useSpring(heroTilt.x, { stiffness: 120, damping: 20, mass: 0.4 });
+  const springRotateY = useSpring(heroTilt.y, { stiffness: 120, damping: 20, mass: 0.4 });
 
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, 120]);
-  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.92]);
-  const orbY = useTransform(scrollYProgress, [0, 1], [0, 180]);
-  const orbLift = useTransform(scrollYProgress, [0, 1], [0, -120]);
-  const rotateX = useMotionValue(0);
-  const rotateY = useMotionValue(0);
-  const springRotateX = useSpring(rotateX, { stiffness: 120, damping: 18, mass: 0.8 });
-  const springRotateY = useSpring(rotateY, { stiffness: 120, damping: 18, mass: 0.8 });
+  useEffect(() => {
+    const updateProgress = () => {
+      const section = aboutSectionRef.current;
 
-  const handleHeroPointerMove = (event) => {
-    const bounds = heroRef.current?.getBoundingClientRect();
-    if (!bounds) return;
+      if (!section) {
+        return;
+      }
 
-    const relativeX = (event.clientX - bounds.left) / bounds.width - 0.5;
-    const relativeY = (event.clientY - bounds.top) / bounds.height - 0.5;
+      const rect = section.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const total = rect.height + viewportHeight * 0.6;
+      const travelled = viewportHeight - rect.top;
+      const progress = Math.min(Math.max(travelled / total, 0), 1);
 
-    rotateX.set(relativeY * -10);
-    rotateY.set(relativeX * 12);
+      setAboutProgress(progress);
+    };
+
+    updateProgress();
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    window.addEventListener('resize', updateProgress);
+
+    return () => {
+      window.removeEventListener('scroll', updateProgress);
+      window.removeEventListener('resize', updateProgress);
+    };
+  }, []);
+
+  useEffect(() => {
+    const section = heroGalleryRef.current;
+
+    if (!section) {
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHeroExpanded(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.45 }
+    );
+
+    observer.observe(section);
+
+    return () => observer.disconnect();
+  }, []);
+
+  const aboutWords = useMemo(() => aboutHighlightCopy.split(' '), []);
+  const talentTopRow = talentProfiles.slice(0, 4);
+  const talentBottomRow = talentProfiles.slice(4);
+
+  const handleHeroMove = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const px = (event.clientX - rect.left) / rect.width;
+    const py = (event.clientY - rect.top) / rect.height;
+
+    setHeroTilt({
+      x: (0.5 - py) * 12,
+      y: (px - 0.5) * 16,
+    });
   };
 
-  const resetHeroDepth = () => {
-    rotateX.set(0);
-    rotateY.set(0);
+  const resetHeroTilt = () => {
+    setHeroTilt({ x: 0, y: 0 });
   };
 
   return (
-    <>
-      <section
-        className="hero-cinematic"
-        ref={heroRef}
-        onPointerMove={handleHeroPointerMove}
-        onPointerLeave={resetHeroDepth}
-      >
-        <motion.div className="hero-video-shell" style={{ y: heroY, scale: heroScale }}>
-          <video className="hero-video" autoPlay muted loop playsInline>
-            <source src="/video.mp4" type="video/mp4" />
-          </video>
-          <div className="hero-video-overlay" />
-        </motion.div>
-
-        <div className="hero-depth-grid" />
-        <motion.div className="hero-light hero-light-left" style={{ y: orbY }} />
-        <motion.div className="hero-light hero-light-right" style={{ y: orbLift }} />
-
-        <div className="container hero-cinematic-grid">
+    <div className="clone-home">
+      <section ref={heroSectionRef} className="clone-hero section-block">
+        <div className="container">
           <motion.div
-            className="hero-intro"
-            initial={{ opacity: 0, y: 42 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <span className="hero-kicker">YBEX Creative Motion Studio</span>
-            <h1 className="hero-display">
-              Premium,
-              <br />
-              motion-led,
-              <br />
-              web presence.
-            </h1>
-            <p className="hero-lead">
-              We refined the interface with calmer typography, cinematic depth, and tasteful
-              3D motion so the brand feels professional, modern, and high value.
-            </p>
-
-            <div className="hero-cta-row">
-              <Link to="/get-started" className="button button-primary">
-                Start Your Project
-              </Link>
-              <Link to="/portfolio" className="button button-secondary">
-                Explore Portfolio
-              </Link>
-            </div>
-
-            <div className="hero-badge-row">
-              {heroBadges.map((badge, index) => (
-                <motion.span
-                  key={badge}
-                  className="hero-badge-pill"
-                  initial={{ opacity: 0, y: 18 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 + index * 0.08, duration: 0.6 }}
-                >
-                  {badge}
-                </motion.span>
-              ))}
-            </div>
-
-            <div className="hero-metrics">
-              <div className="hero-metric">
-                <strong>3D</strong>
-                <span>layered hero interactions</span>
-              </div>
-              <div className="hero-metric">
-                <strong>Clean</strong>
-                <span>more balanced type hierarchy</span>
-              </div>
-              <div className="hero-metric">
-                <strong>Premium</strong>
-                <span>presentation across desktop and mobile</span>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            className="hero-visual-stack"
-            style={{ rotateX: springRotateX, rotateY: springRotateY }}
-            initial={{ opacity: 0, y: 56 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.12, duration: 1 }}
-          >
-            <motion.div
-              className="hero-floating-card hero-card-primary"
-              animate={{ y: [0, -14, 0], rotateZ: [0, -1.5, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <span>Visual direction</span>
-              <strong>Controlled glow, glass surfaces, and depth that feels expensive.</strong>
-            </motion.div>
-
-            <motion.div
-              className="hero-monitor"
-              whileHover={{ rotateX: -6, rotateY: 10, z: 18, scale: 1.02 }}
-              transition={{ type: 'spring', stiffness: 160, damping: 18 }}
-            >
-              <div className="hero-monitor-top">
-                <span />
-                <span />
-                <span />
-              </div>
-              <div className="hero-monitor-screen">
-                <video className="hero-monitor-video" autoPlay muted loop playsInline>
-                  <source src="/video.mp4" type="video/mp4" />
-                </video>
-                <div className="hero-monitor-ui">
-                  <p>YBEX Studio Interface</p>
-                  <strong>Professional, immersive, premium</strong>
-                </div>
-                <div className="hero-monitor-stats">
-                  <span>3D scene</span>
-                  <span>Responsive layout</span>
-                  <span>Elegant motion</span>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className="hero-floating-card hero-card-secondary"
-              animate={{ y: [0, 14, 0], rotateZ: [0, 1.5, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <span>Typography reset</span>
-              <strong>Less oversized text, more rhythm, contrast, and clarity.</strong>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="marquee-strip marquee-strip-strong">
-        <div className="marquee-track">
-          {[...marqueeItems, ...marqueeItems].map((item, index) => (
-            <span key={`${item}-${index}`}>{item}</span>
-          ))}
-        </div>
-      </section>
-
-      <section className="section-block section-tight">
-        <div className="container stats-row stats-row-luxury">
-          {stats.map((item, index) => (
-            <motion.div
-              key={item.label}
-              className="stat-panel stat-panel-glow"
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ delay: index * 0.08, duration: 0.7 }}
-              whileHover={{ y: -6 }}
-            >
-              <strong>{item.value}</strong>
-              <span>{item.label}</span>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      <section className="section-block experience-section">
-        <div className="container experience-grid">
-          <motion.div
-            className="experience-copy"
+            className="clone-hero-copy"
             initial={{ opacity: 0, y: 28 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.25 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <p className="eyebrow">Better visual experience</p>
-            <h2 className="section-title-big">
-              A sharper visual system with depth, restraint, and confidence.
-            </h2>
-            <p className="section-copy">
-              The updated direction removes the oversized feel and replaces it with better
-              proportion, softer pacing, and a more polished premium finish.
-            </p>
+            <div className="clone-pill hero-pill">
+              <span className="hero-pill-year">2026</span>
+              <span>India&apos;s #1 Talent Management Company</span>
+            </div>
 
-            <div className="experience-steps">
-              {experienceSteps.map((step, index) => (
-                <motion.div
-                  key={step}
-                  className="experience-step"
-                  initial={{ opacity: 0, x: -24 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, amount: 0.4 }}
-                  transition={{ delay: index * 0.08, duration: 0.6 }}
-                >
-                  <span>0{index + 1}</span>
-                  <p>{step}</p>
-                </motion.div>
+            <h1 className="clone-hero-title">
+              We Build <span>Talent</span> Powered
+              <br />
+              Momentum.
+            </h1>
+
+            <p className="clone-hero-text">
+              YBEX blends creator strategy, sharp production, and growth-ready execution
+              to turn ideas into campaigns, content, and brands that actually move.
+            </p>
+          </motion.div>
+
+          <motion.div
+            ref={heroGalleryRef}
+            className="hero-gallery-stage"
+            style={{ y: heroParallax, scale: heroScale, rotateX: springRotateX, rotateY: springRotateY }}
+            initial={{ opacity: 0, y: 32 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.35 }}
+            transition={{ duration: 0.8 }}
+            onMouseMove={handleHeroMove}
+            onMouseLeave={resetHeroTilt}
+          >
+            <div className="hero-gallery-glow" />
+            {heroGallery.map((item, index) => (
+              <article
+                key={item.title}
+                className={`hero-gallery-card hero-gallery-card-${index + 1} ${
+                  heroExpanded ? 'is-expanded' : 'is-stacked'
+                }`}
+              >
+                <img src={item.image} alt={item.title} />
+                <div className="hero-gallery-card-copy">
+                  <p>{item.title}</p>
+                  <span>{item.tag}</span>
+                </div>
+              </article>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      <section className="section-block services-panel">
+        <div className="container">
+          <div className="services-grid">
+            {serviceCards.map((card, index) => (
+              <motion.article
+                key={card.title}
+                className="service-panel-card"
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.65, delay: index * 0.08 }}
+              >
+                <div className="service-panel-icon">{String(index + 1).padStart(2, '0')}</div>
+                <h3>{card.title}</h3>
+                <p>{card.description}</p>
+                <Link to="/services" className="service-card-cta">
+                  {card.cta}
+                </Link>
+              </motion.article>
+            ))}
+          </div>
+
+          <div className="services-marquee-shell">
+            <div className="clone-marquee clone-marquee-services">
+              {[...marqueeItems, ...marqueeItems].map((item, index) => (
+                <span key={`${item}-${index}`}>{item}</span>
               ))}
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="experience-stage"
-            initial={{ opacity: 0, scale: 0.96 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.9 }}
-          >
-            <div className="experience-ring" />
-            <div className="experience-card experience-card-top">
-              <span>UI Atmosphere</span>
-              <strong>Editorial type with soft cinematic lighting</strong>
-            </div>
-            <div className="experience-card experience-card-middle">
-              <span>Motion Language</span>
-              <strong>Hover lift, reveal timing, and layered transitions</strong>
-            </div>
-            <div className="experience-card experience-card-bottom">
-              <span>Professional Finish</span>
-              <strong>Luxury depth without losing clarity or speed</strong>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="section-block">
-        <div className="container">
-          <motion.div
-            className="section-heading section-heading-compact"
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.75 }}
-          >
-            <p className="eyebrow">Creative services</p>
-            <h2 className="section-title-big">
-              Built like a premium digital brand, not a loud template.
-            </h2>
-          </motion.div>
-
-          <div className="service-ribbon">
-            {services.map((service, index) => (
+          <div className="service-highlights-grid">
+            {serviceHighlights.map((item, index) => (
               <motion.article
-                key={service.title}
-                className="service-card service-card-rich"
-                initial={{ opacity: 0, y: 26 }}
+                key={item.title}
+                className="service-highlight-item"
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
-                transition={{ delay: index * 0.08, duration: 0.7 }}
-                whileHover={{ y: -10, rotate: index % 2 === 0 ? -1 : 1 }}
+                transition={{ duration: 0.6, delay: index * 0.07 }}
               >
-                <p>{service.eyebrow}</p>
-                <h3>{service.title}</h3>
-                <span>{service.description}</span>
+                <strong>{item.title}</strong>
+                <p>{item.description}</p>
               </motion.article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="section-block">
-        <div className="container">
-          <motion.div
-            className="section-heading section-heading-compact"
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.75 }}
-          >
-            <p className="eyebrow">Selected work</p>
-            <h2 className="section-title-big">
-              Showcase panels with more depth and a cleaner luxury tone.
-            </h2>
-          </motion.div>
+      <section className="section-block clients-section">
+        <div className="container clients-shell">
+          <div className="clone-pill">
+            <span>Our Clients</span>
+          </div>
 
-          <div className="project-grid project-grid-cinematic">
-            {featuredProjects.map((project, index) => (
-              <motion.article
-                key={project.title}
-                className="project-card project-card-cinematic"
-                initial={{ opacity: 0, y: 32 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ delay: index * 0.08, duration: 0.7 }}
-                whileHover={{ y: -10 }}
+          <div className="clients-copy">
+            <h2>
+              Our Clients: Leading
+              <br />
+              <span>Brands That Trust YBEX</span>
+            </h2>
+            <p>
+              We partner with growth-focused brands across categories and build creator-led
+              systems that feel premium, measurable, and culturally aligned.
+            </p>
+          </div>
+
+          <div className="clients-marquee-stack">
+            <div className="logo-marquee">
+              <motion.div
+                className="logo-marquee-track"
+                animate={{ x: ['0%', '-50%'] }}
+                transition={{ duration: 28, ease: 'linear', repeat: Infinity }}
               >
-                <div className="project-media">
-                  <video autoPlay muted loop playsInline>
-                    <source src="/video.mp4" type="video/mp4" />
-                  </video>
-                </div>
-                <div className="project-copy">
-                  <p>{project.category}</p>
-                  <h3>{project.title}</h3>
-                  <strong>{project.impact}</strong>
-                </div>
-              </motion.article>
-            ))}
+                {[...clientLogos, ...clientLogos].map((logo, index) => (
+                  <span key={`${logo}-${index}`} className="logo-pill">
+                    {logo}
+                  </span>
+                ))}
+              </motion.div>
+            </div>
+
+            <div className="logo-marquee logo-marquee-reverse">
+              <motion.div
+                className="logo-marquee-track"
+                animate={{ x: ['-50%', '0%'] }}
+                transition={{ duration: 32, ease: 'linear', repeat: Infinity }}
+              >
+                {[...clientLogos.slice().reverse(), ...clientLogos.slice().reverse()].map((logo, index) => (
+                  <span key={`${logo}-rev-${index}`} className="logo-pill">
+                    {logo}
+                  </span>
+                ))}
+              </motion.div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="section-block">
-        <div className="container cta-banner cta-banner-premium">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.4 }}
-            transition={{ duration: 0.75 }}
-          >
-            <p className="eyebrow">Ready for the next level</p>
-            <h2 className="section-title-big">Let’s turn YBEX into the smooth, high-end animated website you actually wanted.</h2>
-          </motion.div>
-          <Link to="/contact" className="button button-primary">
-            Build The Final Version
+      <section ref={aboutSectionRef} className="section-block about-highlight-section">
+        <div className="container about-highlight-shell">
+          <div className="clone-pill">
+            <span>About Us</span>
+          </div>
+
+          <p className="about-highlight-copy" aria-label={aboutHighlightCopy}>
+            {aboutWords.map((word, index) => {
+              const threshold = index / aboutWords.length;
+              const isActive = aboutProgress >= threshold;
+
+              return (
+                <span key={`${word}-${index}`} className={isActive ? 'is-active' : ''}>
+                  {word}{' '}
+                </span>
+              );
+            })}
+          </p>
+
+          <Link to="/contact" className="button button-primary clone-book-button">
+            Book an Appointment
           </Link>
         </div>
       </section>
-    </>
+
+      <section className="section-block talents-section">
+        <div className="container">
+          <div className="talent-marquee talent-marquee-top">
+            <motion.div
+              className="talent-marquee-track"
+              animate={{ x: ['0%', '-50%'] }}
+              transition={{ duration: 30, ease: 'linear', repeat: Infinity }}
+            >
+              {[...talentTopRow, ...talentTopRow].map((talent, index) => (
+                <article
+                  key={`${talent.name}-top-${index}`}
+                  className="talent-card talent-card-marquee"
+                  style={{ rotate: `${talent.rotation}deg` }}
+                >
+                  <img src={talent.image} alt={talent.name} />
+                  <span>{talent.name}</span>
+                  <small>{talent.role}</small>
+                </article>
+              ))}
+            </motion.div>
+          </div>
+
+          <h2 className="talents-title">Our Exclusive Talents</h2>
+
+          <div className="talent-marquee talent-marquee-bottom">
+            <motion.div
+              className="talent-marquee-track"
+              animate={{ x: ['-50%', '0%'] }}
+              transition={{ duration: 34, ease: 'linear', repeat: Infinity }}
+            >
+              {[...talentBottomRow, ...talentBottomRow].map((talent, index) => (
+                <article
+                  key={`${talent.name}-bottom-${index}`}
+                  className="talent-card talent-card-marquee"
+                  style={{ rotate: `${talent.rotation}deg` }}
+                >
+                  <img src={talent.image} alt={talent.name} />
+                  <span>{talent.name}</span>
+                  <small>{talent.role}</small>
+                </article>
+              ))}
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-block">
+        <div className="container launch-panel">
+          <div className="launch-panel-media">
+            <video autoPlay muted loop playsInline>
+              <source src="/video.mp4" type="video/mp4" />
+            </video>
+            <div className="launch-panel-overlay" />
+          </div>
+
+          <motion.div
+            className="launch-panel-copy"
+            initial={{ opacity: 0, x: 28 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.35 }}
+            transition={{ duration: 0.7 }}
+          >
+            <div className="clone-pill">
+              <span>Launch Your Campaign</span>
+            </div>
+
+            <h2>
+              Launch Your Campaign with YBEX
+              <br />
+              <span>In Minutes, Not Months.</span>
+            </h2>
+
+            <p>
+              Build your brand with YBEX through campaign planning, creator partnerships,
+              content systems, and launch support built to move faster without losing
+              quality. Ready to scale your next idea? Let&apos;s start now.
+            </p>
+
+            <div className="launch-panel-actions">
+              <Link to="/contact" className="button button-primary">
+                Book an Appointment
+              </Link>
+              <span>200+ Agencies Rated</span>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    </div>
   );
 }

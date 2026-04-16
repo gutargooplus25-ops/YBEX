@@ -7,9 +7,9 @@ export default function Portfolio() {
       <div className="container">
         <motion.div className="section-heading page-heading" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
           <p className="eyebrow">Portfolio</p>
-          <h1>Stories, launch systems, and motion-first interfaces that feel made for the moment.</h1>
+          <h1>Proof from campaigns, creator growth, and systems built to keep compounding.</h1>
           <p className="section-copy">
-            Each project below is structured like a campaign case study: strong setup, clear impact, and enough atmosphere to feel premium.
+            Every project reflects the same promise: strategy first, sharp content, clean execution, and growth you can point to.
           </p>
         </motion.div>
 

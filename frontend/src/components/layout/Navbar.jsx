@@ -20,38 +20,40 @@ export default function Navbar() {
 
   return (
     <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
-      <div className="container nav-shell">
-        <Link to="/" className="brand-mark" aria-label="YBEX home">
-          <span>YBEX</span>
-          <small>Creative Motion Studio</small>
-        </Link>
-
-        <nav className="desktop-nav" aria-label="Primary navigation">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={location.pathname === item.path ? 'is-active' : ''}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="nav-actions">
-          <Link to="/get-started" className="button button-primary">
-            Start a Project
+      <div className="container">
+        <div className="nav-shell nav-shell-clone">
+          <Link to="/" className="brand-mark" aria-label="YBEX home">
+            <span className="brand-mark-badge">YX</span>
+            <span className="brand-mark-word">YBEX</span>
           </Link>
-          <button
-            type="button"
-            className="menu-toggle"
-            onClick={() => setIsOpen((value) => !value)}
-            aria-label="Toggle menu"
-            aria-expanded={isOpen}
-          >
-            <span />
-            <span />
-          </button>
+
+          <nav className="desktop-nav" aria-label="Primary navigation">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={location.pathname === item.path ? 'is-active' : ''}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="nav-actions">
+            <Link to="/get-started" className="button button-primary">
+              {'Get Started ->'}
+            </Link>
+            <button
+              type="button"
+              className="menu-toggle"
+              onClick={() => setIsOpen((value) => !value)}
+              aria-label="Toggle menu"
+              aria-expanded={isOpen}
+            >
+              <span />
+              <span />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -67,7 +69,7 @@ export default function Navbar() {
             </Link>
           ))}
           <Link to="/get-started" className="button button-primary mobile-nav-cta">
-            Start a Project
+            {'Get Started ->'}
           </Link>
         </div>
       )}

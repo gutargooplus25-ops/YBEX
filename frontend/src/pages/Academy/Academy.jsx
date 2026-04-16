@@ -8,9 +8,9 @@ export default function Academy() {
       <div className="container">
         <motion.div className="section-heading page-heading" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
           <p className="eyebrow">Academy</p>
-          <h1>Creative learning paths for teams who want better taste, better storytelling, and better execution.</h1>
+          <h1>Learning tracks for teams that want creator-level instincts and agency-level execution.</h1>
           <p className="section-copy">
-            Build internal intuition for motion, visual hierarchy, and campaign thinking so every release feels more intentional.
+            We teach what actually moves the needle: positioning, content architecture, campaign systems, and repeatable growth habits.
           </p>
         </motion.div>
 

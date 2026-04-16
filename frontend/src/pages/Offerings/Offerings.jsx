@@ -8,7 +8,7 @@ export default function Offerings() {
       <div className="container">
         <motion.div className="section-heading page-heading" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
           <p className="eyebrow">Offerings</p>
-          <h1>Flexible engagement models for launches, rebrands, and high-impact front-end redesigns.</h1>
+          <h1>Choose the way you want to work with YBEX, from focused sprints to full growth partnerships.</h1>
         </motion.div>
 
         <div className="feature-grid">
@@ -29,7 +29,7 @@ export default function Offerings() {
         </div>
 
         <div className="page-cta">
-          <Link to="/get-started" className="button button-primary">Choose your direction</Link>
+          <Link to="/get-started" className="button button-primary">Get started</Link>
         </div>
       </div>
     </section>

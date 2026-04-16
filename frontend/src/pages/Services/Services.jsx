@@ -8,9 +8,9 @@ export default function Services() {
       <div className="container">
         <motion.div className="section-heading page-heading" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
           <p className="eyebrow">Services</p>
-          <h1>Creative systems designed to make your brand look sharper, move better, and convert harder.</h1>
+          <h1>Execution services for brands and creators that want real momentum, not random activity.</h1>
           <p className="section-copy">
-            We shape the full experience: visual tone, motion hierarchy, campaign storytelling, and the front-end build that brings it together.
+            We plug into strategy, creator partnerships, content planning, production, and growth so every moving part works together.
           </p>
         </motion.div>
 
@@ -34,16 +34,16 @@ export default function Services() {
         <motion.div className="detail-grid" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }}>
           <div className="detail-panel">
             <p className="eyebrow">Process</p>
-            <h2>From reference moodboards to polished launch flows.</h2>
+            <h2>From sharp brief to campaign running live.</h2>
             <span>
-              We start with narrative and audience intent, then define visual direction, section pacing, content priorities, and motion rules before development begins.
+              We identify the audience, shape the angle, align creators or formats, then manage execution with fast feedback loops.
             </span>
           </div>
           <div className="detail-panel">
             <p className="eyebrow">Output</p>
-            <h2>Pages that feel editorial, animated, and conversion-aware.</h2>
+            <h2>Content and campaigns that look premium and perform like systems.</h2>
             <span>
-              Every build is designed to hold attention with strong hierarchy while still staying easy to navigate on desktop and mobile.
+              The goal is consistency, compounding reach, and cleaner reporting so growth is visible and repeatable.
             </span>
           </div>
         </motion.div>
