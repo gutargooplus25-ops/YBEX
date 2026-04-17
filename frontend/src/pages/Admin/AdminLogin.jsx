@@ -34,7 +34,7 @@ export default function AdminLogin() {
   };
 
   return (
-    <div style={{
+    <div className="admin-login-shell" style={{
       minHeight: '100vh',
       background: '#080808',
       display: 'flex',
@@ -89,6 +89,7 @@ export default function AdminLogin() {
       ))}
 
       <motion.div
+        className="admin-login-card-wrap"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
@@ -282,6 +283,13 @@ export default function AdminLogin() {
           YBEX Command Center · Restricted Access
         </motion.p>
       </motion.div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .admin-login-shell { padding: 1.25rem 0.75rem; }
+          .admin-login-card-wrap { padding: 0 !important; }
+        }
+      `}</style>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const corsConfig = require('./config/corsConfig');
@@ -21,12 +22,24 @@ app.use(corsConfig);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/suggestions', suggestionRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/admin', adminRoutes);
+
+// Public brands endpoint (no auth required)
+const Brand = require('./models/Brand');
+app.get('/api/brands', async (req, res) => {
+  try {
+    const brands = await Brand.find().sort({ createdAt: -1 });
+    res.json({ success: true, brands });
+  } catch (e) { res.status(500).json({ message: 'Server error' }); }
+});
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -177,12 +177,13 @@ export default function AdminDashboard() {
         </motion.div>
       ) : (
         <motion.div
+          className="adm-dashboard-grid"
           variants={containerVariants}
           initial="hidden"
           animate="show"
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
             gap: '0.75rem',
           }}
         >
@@ -210,7 +211,7 @@ export default function AdminDashboard() {
         >
           Quick Actions
         </motion.h2>
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div className="adm-quick-actions" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           {quickActions.map((item, i) => (
             <motion.div
               key={item.to}
@@ -241,6 +242,7 @@ export default function AdminDashboard() {
 
       {/* Activity indicator */}
       <motion.div
+        className="adm-status-banner"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
@@ -262,6 +264,22 @@ export default function AdminDashboard() {
           System online · All services operational · YBEX Command Center v1.0
         </span>
       </motion.div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .adm-quick-actions > div {
+            width: 100%;
+          }
+          .adm-quick-actions a {
+            width: 100%;
+            justify-content: center;
+          }
+          .adm-status-banner {
+            padding: 1rem !important;
+            align-items: flex-start !important;
+          }
+        }
+      `}</style>
     </AdminLayout>
   );
 }

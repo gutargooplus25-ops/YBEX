@@ -35,6 +35,7 @@ export default function AdminPlaceholder({ title, icon, description }) {
 
       {/* Main card */}
       <motion.div
+        className="admin-placeholder-card"
         initial={{ opacity: 0, scale: 0.96, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
@@ -180,7 +181,7 @@ export default function AdminPlaceholder({ title, icon, description }) {
         </div>
 
         {/* Center content */}
-        <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '3rem 2rem' }}>
+        <div className="admin-placeholder-content" style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '3rem 2rem' }}>
           {/* Icon with orbit ring */}
           <div style={{ position: 'relative', display: 'inline-block', marginBottom: '2rem' }}>
             {/* Orbit ring */}
@@ -343,6 +344,13 @@ export default function AdminPlaceholder({ title, icon, description }) {
           </motion.div>
         </div>
       </motion.div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .admin-placeholder-card { min-height: 420px !important; }
+          .admin-placeholder-content { padding: 2.5rem 1.25rem !important; }
+        }
+      `}</style>
     </AdminLayout>
   );
 }

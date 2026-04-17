@@ -32,3 +32,11 @@ export const deleteAdminUser = (id) => axiosInstance.delete(`/admin/users/${id}`
 export const getAdminSuggestions = (params) => axiosInstance.get('/admin/suggestions', { params });
 export const updateAdminSuggestion = (id, status) => axiosInstance.patch(`/admin/suggestions/${id}`, { status });
 export const deleteAdminSuggestion = (id) => axiosInstance.delete(`/admin/suggestions/${id}`);
+
+// Brands (public)
+export const getPublicBrands = () => axiosInstance.get('/brands');
+
+// Brands (admin)
+export const getAdminBrands = () => axiosInstance.get('/admin/brands');
+export const addAdminBrand = (formData) => axiosInstance.post('/admin/brands', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+export const deleteAdminBrand = (id) => axiosInstance.delete(`/admin/brands/${id}`);

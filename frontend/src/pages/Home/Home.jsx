@@ -10,6 +10,14 @@ import {
   serviceHighlights,
   talentProfiles,
 } from '../../content/siteData';
+import axiosInstance from '../../api/axiosInstance';
+
+const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace('/api', '');
+const toAbsUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  return `${API_BASE}${url}`;
+};
 
 export default function Home() {
   const aboutSectionRef = useRef(null);
@@ -18,6 +26,8 @@ export default function Home() {
   const [aboutProgress, setAboutProgress] = useState(0);
   const [heroExpanded, setHeroExpanded] = useState(false);
   const [heroTilt, setHeroTilt] = useState({ x: 0, y: 0 });
+  const [brands, setBrands] = useState([]);
+  const [brandsLoading, setBrandsLoading] = useState(true);
 
   const { scrollYProgress: heroScrollProgress } = useScroll({
     target: heroSectionRef,
@@ -81,6 +91,17 @@ export default function Home() {
   const talentTopRow = talentProfiles.slice(0, 4);
   const talentBottomRow = talentProfiles.slice(4);
 
+  // Fetch brands from backend
+  useEffect(() => {
+    axiosInstance.get('/brands')
+      .then((res) => setBrands(res.data.brands || []))
+      .catch(() => setBrands([]))
+      .finally(() => setBrandsLoading(false));
+  }, []);
+
+  // Mobile gallery: tap cover to fan out cards
+  const [mobileGalleryOpen, setMobileGalleryOpen] = useState(false);
+
   const handleHeroMove = (event) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const px = (event.clientX - rect.left) / rect.width;
@@ -123,9 +144,10 @@ export default function Home() {
             </p>
           </motion.div>
 
+          {/* ── Desktop gallery ── */}
           <motion.div
             ref={heroGalleryRef}
-            className="hero-gallery-stage"
+            className="hero-gallery-stage hero-gallery-desktop"
             style={{ y: heroParallax, scale: heroScale, rotateX: springRotateX, rotateY: springRotateY }}
             initial={{ opacity: 0, y: 32 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -150,6 +172,70 @@ export default function Home() {
               </article>
             ))}
           </motion.div>
+
+          {/* ── Mobile gallery — cover stack + fan-out on tap ── */}
+          <div className="hero-gallery-mobile">
+            <motion.div
+              className={`hero-gallery-mobile-stage${mobileGalleryOpen ? ' is-open' : ''}`}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.7 }}
+            >
+              <div className="hero-gallery-mobile-glow" />
+
+              {!mobileGalleryOpen && (
+                <motion.div
+                  className="hero-gallery-mobile-hint"
+                  animate={{ y: [0, -5, 0] }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                  onClick={() => setMobileGalleryOpen(true)}
+                >
+                  <span>Tap to explore</span>
+                  <span className="hero-gallery-mobile-hint-arrow">↓</span>
+                </motion.div>
+              )}
+
+              {heroGallery.map((item, index) => {
+                const total = heroGallery.length;
+                const stackRotate = (index - total / 2) * 7;
+                const stackX = (index - total / 2) * 22;
+                return (
+                  <motion.article
+                    key={item.title}
+                    className="hero-gallery-mobile-card"
+                    onClick={() => setMobileGalleryOpen(v => !v)}
+                    animate={mobileGalleryOpen ? {
+                      x: 0, y: 0, rotate: 0, scale: 1, opacity: 1, zIndex: index + 1,
+                    } : {
+                      x: stackX, y: index * -5, rotate: stackRotate,
+                      scale: index === 0 ? 1 : 0.9 - index * 0.03,
+                      opacity: index === 0 ? 1 : 0.65 - index * 0.07,
+                      zIndex: total - index,
+                    }}
+                    transition={{ duration: 0.42, delay: mobileGalleryOpen ? index * 0.055 : 0, ease: [0.22, 1, 0.36, 1] }}
+                    whileHover={mobileGalleryOpen ? { y: -10, scale: 1.04, zIndex: 20 } : {}}
+                  >
+                    <img src={item.image} alt={item.title} loading="lazy" />
+                    <div className="hero-gallery-mobile-card-copy">
+                      <span className="hero-gallery-mobile-tag">{item.tag}</span>
+                      <p>{item.title}</p>
+                    </div>
+                  </motion.article>
+                );
+              })}
+            </motion.div>
+
+            {mobileGalleryOpen && (
+              <motion.button
+                initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                onClick={() => setMobileGalleryOpen(false)}
+                className="hero-gallery-mobile-close"
+              >
+                ↑ Collapse
+              </motion.button>
+            )}
+          </div>
         </div>
       </section>
 
@@ -219,35 +305,183 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="clients-marquee-stack">
-            <div className="logo-marquee">
-              <motion.div
-                className="logo-marquee-track"
-                animate={{ x: ['0%', '-50%'] }}
-                transition={{ duration: 28, ease: 'linear', repeat: Infinity }}
-              >
-                {[...clientLogos, ...clientLogos].map((logo, index) => (
-                  <span key={`${logo}-${index}`} className="logo-pill">
-                    {logo}
-                  </span>
-                ))}
-              </motion.div>
+          {brandsLoading ? (
+            <div className="clients-marquee-stack">
+              <div className="logo-marquee">
+                <motion.div
+                  className="logo-marquee-track"
+                  animate={{ opacity: [0.3, 0.6, 0.3] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  style={{ display: 'flex', gap: '24px' }}
+                >
+                  {[...Array(8)].map((_, i) => (
+                    <div key={i} style={{
+                      minWidth: '120px', height: '72px', borderRadius: '20px',
+                      background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                    }} />
+                  ))}
+                </motion.div>
+              </div>
             </div>
+          ) : brands.length > 0 ? (
+            <div className="clients-marquee-stack">
+              <div className="logo-marquee">
+                <motion.div
+                  className="logo-marquee-track"
+                  animate={{ x: ['0%', '-50%'] }}
+                  transition={{ duration: 28, ease: 'linear', repeat: Infinity }}
+                >
+                  {[...brands, ...brands].map((brand, index) => (
+                    <motion.a
+                      key={`${brand._id}-${index}`}
+                      href={brand.websiteLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="logo-pill logo-pill-brand"
+                      whileHover={{ scale: 1.08, y: -4, boxShadow: '0 12px 30px rgba(228,241,65,0.2)' }}
+                      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                      style={{
+                        position: 'relative',
+                        textDecoration: 'none',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <img
+                        src={toAbsUrl(brand.logoUrl)}
+                        alt={brand.name}
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: '50px',
+                          objectFit: 'contain',
+                          filter: 'brightness(0.9)',
+                          transition: 'filter 0.3s',
+                        }}
+                        onMouseEnter={(e) => e.target.style.filter = 'brightness(1.1)'}
+                        onMouseLeave={(e) => e.target.style.filter = 'brightness(0.9)'}
+                      />
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        whileHover={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                        style={{
+                          position: 'absolute',
+                          bottom: '-32px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          background: 'rgba(0,0,0,0.9)',
+                          border: '1px solid rgba(228,241,65,0.3)',
+                          borderRadius: '8px',
+                          padding: '4px 10px',
+                          fontSize: '0.65rem',
+                          color: '#e4f141',
+                          fontWeight: 700,
+                          letterSpacing: '0.04em',
+                          whiteSpace: 'nowrap',
+                          pointerEvents: 'none',
+                          zIndex: 10,
+                        }}
+                      >
+                        🔗 {brand.name}
+                      </motion.div>
+                    </motion.a>
+                  ))}
+                </motion.div>
+              </div>
 
-            <div className="logo-marquee logo-marquee-reverse">
-              <motion.div
-                className="logo-marquee-track"
-                animate={{ x: ['-50%', '0%'] }}
-                transition={{ duration: 32, ease: 'linear', repeat: Infinity }}
-              >
-                {[...clientLogos.slice().reverse(), ...clientLogos.slice().reverse()].map((logo, index) => (
-                  <span key={`${logo}-rev-${index}`} className="logo-pill">
-                    {logo}
-                  </span>
-                ))}
-              </motion.div>
+              <div className="logo-marquee logo-marquee-reverse">
+                <motion.div
+                  className="logo-marquee-track"
+                  animate={{ x: ['-50%', '0%'] }}
+                  transition={{ duration: 32, ease: 'linear', repeat: Infinity }}
+                >
+                  {[...brands.slice().reverse(), ...brands.slice().reverse()].map((brand, index) => (
+                    <motion.a
+                      key={`${brand._id}-rev-${index}`}
+                      href={brand.websiteLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="logo-pill logo-pill-brand"
+                      whileHover={{ scale: 1.08, y: -4, boxShadow: '0 12px 30px rgba(228,241,65,0.2)' }}
+                      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                      style={{
+                        position: 'relative',
+                        textDecoration: 'none',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <img
+                        src={toAbsUrl(brand.logoUrl)}
+                        alt={brand.name}
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: '50px',
+                          objectFit: 'contain',
+                          filter: 'brightness(0.9)',
+                          transition: 'filter 0.3s',
+                        }}
+                        onMouseEnter={(e) => e.target.style.filter = 'brightness(1.1)'}
+                        onMouseLeave={(e) => e.target.style.filter = 'brightness(0.9)'}
+                      />
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        whileHover={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                        style={{
+                          position: 'absolute',
+                          bottom: '-32px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          background: 'rgba(0,0,0,0.9)',
+                          border: '1px solid rgba(228,241,65,0.3)',
+                          borderRadius: '8px',
+                          padding: '4px 10px',
+                          fontSize: '0.65rem',
+                          color: '#e4f141',
+                          fontWeight: 700,
+                          letterSpacing: '0.04em',
+                          whiteSpace: 'nowrap',
+                          pointerEvents: 'none',
+                          zIndex: 10,
+                        }}
+                      >
+                        🔗 {brand.name}
+                      </motion.div>
+                    </motion.a>
+                  ))}
+                </motion.div>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="clients-marquee-stack">
+              <div className="logo-marquee">
+                <motion.div
+                  className="logo-marquee-track"
+                  animate={{ x: ['0%', '-50%'] }}
+                  transition={{ duration: 28, ease: 'linear', repeat: Infinity }}
+                >
+                  {[...clientLogos, ...clientLogos].map((logo, index) => (
+                    <span key={`${logo}-${index}`} className="logo-pill">
+                      {logo}
+                    </span>
+                  ))}
+                </motion.div>
+              </div>
+
+              <div className="logo-marquee logo-marquee-reverse">
+                <motion.div
+                  className="logo-marquee-track"
+                  animate={{ x: ['-50%', '0%'] }}
+                  transition={{ duration: 32, ease: 'linear', repeat: Infinity }}
+                >
+                  {[...clientLogos.slice().reverse(), ...clientLogos.slice().reverse()].map((logo, index) => (
+                    <span key={`${logo}-rev-${index}`} className="logo-pill">
+                      {logo}
+                    </span>
+                  ))}
+                </motion.div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
