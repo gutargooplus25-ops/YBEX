@@ -41,6 +41,15 @@ app.get('/api/brands', async (req, res) => {
   } catch (e) { res.status(500).json({ message: 'Server error' }); }
 });
 
+// Public influencers endpoint (no auth required)
+const Influencer = require('./models/Influencer');
+app.get('/api/influencers', async (req, res) => {
+  try {
+    const influencers = await Influencer.find().sort({ createdAt: -1 });
+    res.json({ success: true, influencers });
+  } catch (e) { res.status(500).json({ message: 'Server error' }); }
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });

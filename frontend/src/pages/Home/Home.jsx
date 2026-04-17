@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useSpring, useTransform } from 'motion/react';
 import {
@@ -28,6 +29,11 @@ export default function Home() {
   const [heroTilt, setHeroTilt] = useState({ x: 0, y: 0 });
   const [brands, setBrands] = useState([]);
   const [brandsLoading, setBrandsLoading] = useState(true);
+  const [influencers, setInfluencers] = useState([]);
+  const [influencersLoading, setInfluencersLoading] = useState(true);
+  // hover-pause state for each marquee row
+  const [pauseTop, setPauseTop] = useState(false);
+  const [pauseBottom, setPauseBottom] = useState(false);
 
   const { scrollYProgress: heroScrollProgress } = useScroll({
     target: heroSectionRef,
@@ -97,6 +103,14 @@ export default function Home() {
       .then((res) => setBrands(res.data.brands || []))
       .catch(() => setBrands([]))
       .finally(() => setBrandsLoading(false));
+  }, []);
+
+  // Fetch influencers from backend
+  useEffect(() => {
+    axiosInstance.get('/influencers')
+      .then((res) => setInfluencers(res.data.influencers || []))
+      .catch(() => setInfluencers([]))
+      .finally(() => setInfluencersLoading(false));
   }, []);
 
   // Mobile gallery: tap cover to fan out cards
@@ -512,47 +526,69 @@ export default function Home() {
 
       <section className="section-block talents-section">
         <div className="container">
-          <div className="talent-marquee talent-marquee-top">
-            <motion.div
-              className="talent-marquee-track"
-              animate={{ x: ['0%', '-50%'] }}
-              transition={{ duration: 30, ease: 'linear', repeat: Infinity }}
-            >
-              {[...talentTopRow, ...talentTopRow].map((talent, index) => (
-                <article
-                  key={`${talent.name}-top-${index}`}
-                  className="talent-card talent-card-marquee"
-                  style={{ rotate: `${talent.rotation}deg` }}
-                >
-                  <img src={talent.image} alt={talent.name} />
-                  <span>{talent.name}</span>
-                  <small>{talent.role}</small>
-                </article>
-              ))}
-            </motion.div>
-          </div>
+          {(() => {
+            const useDB     = !influencersLoading && influencers.length > 0;
+            const topRow    = useDB ? influencers.slice(0, Math.ceil(influencers.length / 2)) : talentTopRow;
+            const bottomRow = useDB ? influencers.slice(Math.ceil(influencers.length / 2))   : talentBottomRow;
 
-          <h2 className="talents-title">Our Exclusive Talents</h2>
+            const renderCard = (item, keyPrefix, index) => {
+              const imgSrc = useDB ? toAbsUrl(item.imageUrl) : item.image;
+              const name   = item.name;
+              const role   = useDB ? 'Influencer' : item.role;
+              const link   = useDB ? item.profileLink : null;
+              const rot    = useDB ? ((index % 5) - 2) * 3 : item.rotation;
 
-          <div className="talent-marquee talent-marquee-bottom">
-            <motion.div
-              className="talent-marquee-track"
-              animate={{ x: ['-50%', '0%'] }}
-              transition={{ duration: 34, ease: 'linear', repeat: Infinity }}
-            >
-              {[...talentBottomRow, ...talentBottomRow].map((talent, index) => (
+              const inner = (
                 <article
-                  key={`${talent.name}-bottom-${index}`}
                   className="talent-card talent-card-marquee"
-                  style={{ rotate: `${talent.rotation}deg` }}
+                  style={{ rotate: `${rot}deg`, cursor: link ? 'pointer' : 'default' }}
                 >
-                  <img src={talent.image} alt={talent.name} />
-                  <span>{talent.name}</span>
-                  <small>{talent.role}</small>
+                  {imgSrc
+                    ? <img src={imgSrc} alt={name} />
+                    : <div style={{ width: '100%', height: '100%', background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>🌟</div>
+                  }
+                  <span>{name}</span>
+                  <small>{role}</small>
                 </article>
-              ))}
-            </motion.div>
-          </div>
+              );
+
+              if (link) {
+                return (
+                  <a key={`${keyPrefix}-${index}`} href={link} target="_blank" rel="noreferrer"
+                    style={{ textDecoration: 'none', display: 'contents' }}>
+                    {inner}
+                  </a>
+                );
+              }
+              return <React.Fragment key={`${keyPrefix}-${index}`}>{inner}</React.Fragment>;
+            };
+
+            return (
+              <>
+                {/* TOP ROW — scrolls left, pauses on hover */}
+                <div className={`talent-marquee talent-marquee-top${pauseTop ? ' is-paused' : ''}`}
+                  onMouseEnter={() => setPauseTop(true)}
+                  onMouseLeave={() => setPauseTop(false)}
+                >
+                  <div className="talent-marquee-track talent-css-left">
+                    {[...topRow, ...topRow].map((item, i) => renderCard(item, 'top', i))}
+                  </div>
+                </div>
+
+                <h2 className="talents-title">Our Exclusive Talents</h2>
+
+                {/* BOTTOM ROW — scrolls right, pauses on hover */}
+                <div className={`talent-marquee talent-marquee-bottom${pauseBottom ? ' is-paused' : ''}`}
+                  onMouseEnter={() => setPauseBottom(true)}
+                  onMouseLeave={() => setPauseBottom(false)}
+                >
+                  <div className="talent-marquee-track talent-css-right">
+                    {[...bottomRow, ...bottomRow].map((item, i) => renderCard(item, 'bottom', i))}
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </div>
       </section>
 

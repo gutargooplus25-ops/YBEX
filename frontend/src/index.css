@@ -2924,3 +2924,27 @@ img, video, iframe {
     font-size: 1.5rem !important;
   }
 }
+
+/* ── Talent Marquee CSS Animations (for hover-pause) ── */
+@keyframes talent-scroll-left {
+  from { transform: translateX(0%); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes talent-scroll-right {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0%); }
+}
+
+.talent-css-left {
+  animation: talent-scroll-left 30s linear infinite;
+}
+
+.talent-css-right {
+  animation: talent-scroll-right 34s linear infinite;
+}
+
+/* Pause on hover */
+.talent-marquee.is-paused .talent-marquee-track {
+  animation-play-state: paused !important;
+}

@@ -3,6 +3,13 @@ import { motion, AnimatePresence } from 'motion/react';
 import AdminLayout from './AdminLayout';
 import axiosInstance from '../../api/axiosInstance';
 
+const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace('/api', '');
+const toAbsUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  return `${API_BASE}${url}`;
+};
+
 function AddInfluencerModal({ open, onClose, onAdd }) {
   const [form, setForm] = useState({ name: '', profileLink: '', image: null, imagePreview: null });
   const [saving, setSaving] = useState(false);
@@ -253,7 +260,7 @@ export default function AdminInfluencers() {
               >
                 <div style={{ width: '100%', aspectRatio: '1', background: 'rgba(255,255,255,0.05)', overflow: 'hidden', position: 'relative' }}>
                   {inf.imageUrl
-                    ? <img src={inf.imageUrl} alt={inf.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s, filter 0.3s' }}
+                    ? <img src={toAbsUrl(inf.imageUrl)} alt={inf.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s, filter 0.3s' }}
                         onMouseEnter={(e) => { e.target.style.transform = 'scale(1.07)'; e.target.style.filter = 'brightness(1.1)'; }}
                         onMouseLeave={(e) => { e.target.style.transform = 'scale(1)'; e.target.style.filter = 'brightness(1)'; }}
                       />
