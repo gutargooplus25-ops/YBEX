@@ -50,9 +50,9 @@ router.patch('/suggestions/:id',    updateAdminSuggestion);
 router.delete('/suggestions/:id',   deleteAdminSuggestion);
 
 // ── Team Members ──────────────────────────────────────────────────
-router.get('/team-members',          getTeamMembers);
-router.post('/team-members',         upload.single('image'), addTeamMember);
-router.delete('/team-members/:id',   deleteTeamMember);
+router.get('/team-members',        getTeamMembers);
+router.post('/team-members',       addTeamMember);
+router.delete('/team-members/:id', deleteTeamMember);
 
 // ── Influencers ───────────────────────────────────────────────────
 router.get('/influencers', async (req, res, next) => {
@@ -62,12 +62,15 @@ router.get('/influencers', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-router.post('/influencers', upload.single('image'), async (req, res, next) => {
+router.post('/influencers', async (req, res, next) => {
   try {
-    const { name, profileLink } = req.body;
+    const { name, profileLink, imageUrl } = req.body;
     if (!name?.trim()) return res.status(400).json({ message: 'Name is required' });
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
-    const influencer = await Influencer.create({ name: name.trim(), profileLink: profileLink || '', imageUrl });
+    const influencer = await Influencer.create({
+      name: name.trim(),
+      profileLink: profileLink || '',
+      imageUrl: imageUrl?.trim() || null,
+    });
     res.status(201).json({ success: true, influencer });
   } catch (e) { next(e); }
 });
@@ -76,7 +79,8 @@ router.delete('/influencers/:id', async (req, res, next) => {
   try {
     const inf = await Influencer.findByIdAndDelete(req.params.id);
     if (!inf) return res.status(404).json({ message: 'Not found' });
-    if (inf.imageUrl) {
+    // Only delete local file if it was a local upload (not an external URL)
+    if (inf.imageUrl && inf.imageUrl.startsWith('/uploads/')) {
       const fp = path.join(__dirname, '../uploads', path.basename(inf.imageUrl));
       if (fs.existsSync(fp)) fs.unlinkSync(fp);
     }
@@ -92,14 +96,17 @@ router.get('/brands', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-router.post('/brands', upload.single('logo'), async (req, res, next) => {
+router.post('/brands', async (req, res, next) => {
   try {
-    const { name, websiteLink } = req.body;
-    if (!name?.trim()) return res.status(400).json({ message: 'Brand name is required' });
+    const { name, websiteLink, logoUrl } = req.body;
+    if (!name?.trim())        return res.status(400).json({ message: 'Brand name is required' });
     if (!websiteLink?.trim()) return res.status(400).json({ message: 'Website link is required' });
-    if (!req.file) return res.status(400).json({ message: 'Brand logo is required' });
-    const logoUrl = `/uploads/${req.file.filename}`;
-    const brand = await Brand.create({ name: name.trim(), logoUrl, websiteLink: websiteLink.trim() });
+    if (!logoUrl?.trim())     return res.status(400).json({ message: 'Logo image URL is required' });
+    const brand = await Brand.create({
+      name: name.trim(),
+      logoUrl: logoUrl.trim(),
+      websiteLink: websiteLink.trim(),
+    });
     res.status(201).json({ success: true, brand });
   } catch (e) { next(e); }
 });
@@ -108,7 +115,8 @@ router.delete('/brands/:id', async (req, res, next) => {
   try {
     const brand = await Brand.findByIdAndDelete(req.params.id);
     if (!brand) return res.status(404).json({ message: 'Not found' });
-    if (brand.logoUrl) {
+    // Only delete local file if it was a local upload
+    if (brand.logoUrl && brand.logoUrl.startsWith('/uploads/')) {
       const fp = path.join(__dirname, '../uploads', path.basename(brand.logoUrl));
       if (fs.existsSync(fp)) fs.unlinkSync(fp);
     }

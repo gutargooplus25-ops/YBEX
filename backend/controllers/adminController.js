@@ -179,10 +179,15 @@ const getTeamMembers = async (req, res, next) => {
 
 const addTeamMember = async (req, res, next) => {
   try {
-    const { name, role, coreTeam, socialLink } = req.body;
+    const { name, role, coreTeam, socialLink, imageUrl } = req.body;
     if (!name?.trim()) return res.status(400).json({ message: 'Name is required' });
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
-    const member = await TeamMember.create({ name: name.trim(), role: role || '', coreTeam: coreTeam || 'Core Team', socialLink: socialLink || '', imageUrl });
+    const member = await TeamMember.create({
+      name: name.trim(),
+      role: role || '',
+      coreTeam: coreTeam || 'Core Team',
+      socialLink: socialLink || '',
+      imageUrl: imageUrl?.trim() || null,
+    });
     res.status(201).json({ success: true, member });
   } catch (e) { next(e); }
 };
@@ -191,7 +196,7 @@ const deleteTeamMember = async (req, res, next) => {
   try {
     const member = await TeamMember.findByIdAndDelete(req.params.id);
     if (!member) return res.status(404).json({ message: 'Member not found' });
-    if (member.imageUrl) {
+    if (member.imageUrl && member.imageUrl.startsWith('/uploads/')) {
       const fp = path.join(__dirname, '..', member.imageUrl);
       if (fs.existsSync(fp)) fs.unlinkSync(fp);
     }
