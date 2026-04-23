@@ -373,10 +373,26 @@ export default function Navbar() {
                   <span style={{ 
                     position: 'relative',
                     zIndex: 2,
-                    color: hoveredItem === item.path ? '#E4F141' : 'inherit',
-                    transition: 'color 0.3s ease'
+                    color: item.highlight
+                      ? '#e4f141'
+                      : hoveredItem === item.path ? '#E4F141' : 'inherit',
+                    transition: 'color 0.3s ease',
+                    fontWeight: item.highlight ? 700 : undefined,
                   }}>
                     {item.label}
+                    {item.highlight && (
+                      <span style={{
+                        marginLeft: '5px',
+                        fontSize: '0.6rem',
+                        background: 'rgba(228,241,65,0.15)',
+                        border: '1px solid rgba(228,241,65,0.35)',
+                        borderRadius: '4px',
+                        padding: '1px 5px',
+                        verticalAlign: 'middle',
+                        letterSpacing: '0.04em',
+                        color: '#e4f141',
+                      }}>FREE</span>
+                    )}
                   </span>
                   
                   {/* Hover glow background */}
@@ -608,10 +624,10 @@ export default function Navbar() {
                         display: 'block',
                         padding: '0.85rem 0',
                         fontSize: '1.15rem',
-                        fontWeight: 500,
+                        fontWeight: item.highlight ? 700 : 500,
                         borderBottom: `1px solid ${theme === 'light' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)'}`,
                         position: 'relative',
-                        color: theme === 'light' ? '#1a1a1a' : '#fff',
+                        color: item.highlight ? '#e4f141' : (theme === 'light' ? '#1a1a1a' : '#fff'),
                       }}
                     >
                       <motion.span

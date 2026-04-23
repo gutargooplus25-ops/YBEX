@@ -11,6 +11,7 @@ import About from './pages/About/About';
 import Contact from './pages/Contact/Contact';
 import GetStarted from './pages/GetStarted/GetStarted';
 import Offerings from './pages/Offerings/Offerings';
+import Invoice from './pages/Invoice/Invoice';
 
 // Admin pages
 import AdminLogin from './pages/Admin/AdminLogin';
@@ -21,6 +22,7 @@ import AdminAboutTeam from './pages/Admin/AdminAboutTeam';
 import AdminInfluencers from './pages/Admin/AdminInfluencers';
 import AdminBrands from './pages/Admin/AdminBrands';
 import AdminPlaceholder from './pages/Admin/AdminPlaceholder';
+import AdminInvoices from './pages/Admin/AdminInvoices';
 
 // Wraps public pages with Navbar + Footer
 function PublicLayout() {
@@ -44,6 +46,7 @@ export default function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/get-started" element={<GetStarted />} />
         <Route path="/offerings" element={<Offerings />} />
+        <Route path="/invoice" element={<Invoice />} />
       </Route>
 
       {/* ── Admin routes (NO Navbar/Footer) ── */}
@@ -60,7 +63,7 @@ export default function App() {
       <Route path="/admin/success-stories" element={<AdminRoute><AdminPlaceholder title="Success Stories" icon="🏆" description="Manage and publish success stories." /></AdminRoute>} />
       <Route path="/admin/scholarship" element={<AdminRoute><AdminPlaceholder title="Scholarship" icon="🎖️" description="Manage scholarship applications and awards." /></AdminRoute>} />
       <Route path="/admin/activity-logs" element={<AdminRoute><AdminPlaceholder title="Activity Logs" icon="📊" description="View all admin and user activity logs." /></AdminRoute>} />
-      <Route path="/admin/invoices" element={<AdminRoute><AdminPlaceholder title="Invoices" icon="🧾" description="Manage and track all invoices." /></AdminRoute>} />
+      <Route path="/admin/invoices" element={<AdminRoute><AdminInvoices /></AdminRoute>} />
       <Route path="/admin/ybex-story" element={<AdminRoute><AdminPlaceholder title="YBEX Story" icon="📖" description="Manage the YBEX brand story and timeline." /></AdminRoute>} />
       <Route path="/admin/portfolio" element={<AdminRoute><AdminPlaceholder title="Portfolio" icon="🗂️" description="Manage portfolio projects and case studies." /></AdminRoute>} />
       <Route path="/admin/bin" element={<AdminRoute><AdminPlaceholder title="Bin" icon="🗑️" description="Review and restore deleted items." /></AdminRoute>} />
