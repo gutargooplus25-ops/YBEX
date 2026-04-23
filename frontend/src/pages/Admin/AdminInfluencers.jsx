@@ -5,16 +5,19 @@ import axiosInstance from '../../api/axiosInstance';
 import DeleteConfirmModal from '../../components/common/DeleteConfirmModal';
 
 const ACCENT = '#e4f141';
-const DIM    = 'rgba(255,255,255,0.12)';
-const MUTED  = 'rgba(255,255,255,0.35)';
+const DIM    = 'rgba(255,255,255,0.1)';
+const MUTED  = 'rgba(255,255,255,0.55)';
+const CARD_BG = 'linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)';
 
 const inp = {
-  width: '100%', padding: '0.8rem 1rem',
-  background: 'rgba(255,255,255,0.05)',
+  width: '100%', padding: '0.9rem 1.1rem',
+  background: 'rgba(255,255,255,0.04)',
   border: `1px solid ${DIM}`,
-  borderRadius: '10px', color: '#fff', fontSize: '0.88rem',
-  outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s, box-shadow 0.2s',
-  fontFamily: 'inherit',
+  borderRadius: '12px', color: '#fff', fontSize: '0.9rem',
+  outline: 'none', boxSizing: 'border-box', 
+  transition: 'all 0.25s cubic-bezier(0.22, 1, 0.36, 1)',
+  fontFamily: "'Inter', system-ui, sans-serif",
+  fontWeight: 400,
 };
 const focus = (e) => { e.target.style.borderColor = ACCENT; e.target.style.boxShadow = '0 0 0 3px rgba(228,241,65,0.08)'; };
 const blur  = (e) => { e.target.style.borderColor = DIM;    e.target.style.boxShadow = 'none'; };
@@ -179,15 +182,55 @@ export default function AdminInfluencers() {
       />
 
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
-        style={{ marginBottom: '1.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}
+        style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}
       >
         <div>
-          <h1 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#fff', marginBottom: '0.2rem', letterSpacing: '-0.02em' }}>Influencers</h1>
-          <p style={{ color: MUTED, fontSize: '0.8rem' }}>{influencers.length} influencer{influencers.length !== 1 ? 's' : ''} · shown on homepage talents section</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
+            <motion.div 
+              animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ 
+                width: '44px', 
+                height: '44px', 
+                borderRadius: '14px', 
+                background: 'linear-gradient(135deg, rgba(228,241,65,0.15) 0%, rgba(228,241,65,0.05) 100%)',
+                border: '1px solid rgba(228,241,65,0.25)',
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                fontSize: '1.4rem',
+                boxShadow: '0 8px 32px rgba(228,241,65,0.15)',
+              }}
+            >🌟</motion.div>
+            <h1 style={{ 
+              fontSize: '1.6rem', 
+              fontWeight: 800, 
+              color: '#fff', 
+              margin: 0,
+              letterSpacing: '-0.03em',
+              fontFamily: "'Space Grotesk', sans-serif",
+            }}>Influencers</h1>
+          </div>
+          <p style={{ color: MUTED, fontSize: '0.85rem', paddingLeft: '56px', margin: 0 }}>{influencers.length} influencer{influencers.length !== 1 ? 's' : ''} · shown on homepage talents section</p>
         </div>
-        <motion.button whileHover={{ scale: 1.05, boxShadow: '0 8px 25px rgba(228,241,65,0.3)' }} whileTap={{ scale: 0.96 }}
+        <motion.button 
+          whileHover={{ scale: 1.03, boxShadow: '0 12px 35px rgba(228,241,65,0.35)' }} 
+          whileTap={{ scale: 0.97 }}
           onClick={() => setModalOpen(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.65rem 1.25rem', background: ACCENT, border: 'none', borderRadius: '10px', color: '#000', fontSize: '0.85rem', fontWeight: 800, cursor: 'pointer' }}
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '10px', 
+            padding: '0.85rem 1.6rem', 
+            background: 'linear-gradient(135deg, #e4f141 0%, #d4e130 100%)', 
+            border: 'none', 
+            borderRadius: '14px', 
+            color: '#000', 
+            fontSize: '0.9rem', 
+            fontWeight: 700, 
+            cursor: 'pointer',
+            boxShadow: '0 4px 20px rgba(228,241,65,0.2)',
+          }}
         >+ Add Influencer</motion.button>
       </motion.div>
 
@@ -198,22 +241,33 @@ export default function AdminInfluencers() {
       </motion.div>
 
       {loading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1.25rem' }}>
           {[...Array(6)].map((_, i) => (
-            <motion.div key={i} animate={{ opacity: [0.2, 0.5, 0.2] }} transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.1 }}
-              style={{ height: '200px', borderRadius: '14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }} />
+            <motion.div key={i} animate={{ opacity: [0.15, 0.4, 0.15] }} transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.15 }}
+              style={{ height: '240px', borderRadius: '20px', background: 'linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)', border: '1px solid rgba(255,255,255,0.06)' }} />
           ))}
         </div>
       ) : influencers.length === 0 ? (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '5rem', textAlign: 'center', color: 'rgba(255,255,255,0.25)', fontSize: '0.9rem' }}
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
+          style={{ 
+            background: CARD_BG, 
+            border: '1px solid rgba(255,255,255,0.08)', 
+            borderRadius: '24px', 
+            padding: '5rem 2rem', 
+            textAlign: 'center',
+          }}
         >
-          <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🌟</div>
-          No influencers yet. Click "Add Influencer" to get started.
+          <motion.div 
+            animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+            transition={{ duration: 3, repeat: Infinity }}
+            style={{ fontSize: '3.5rem', marginBottom: '1.5rem', filter: 'drop-shadow(0 0 30px rgba(228,241,65,0.3))' }}
+          >🌟</motion.div>
+          <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1.1rem', fontWeight: 600, marginBottom: '8px' }}>No influencers yet</div>
+          <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.9rem' }}>Click "Add Influencer" to get started.</div>
         </motion.div>
       ) : (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1rem' }}
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1.25rem' }}
         >
           <AnimatePresence>
             {influencers.map((inf, i) => (

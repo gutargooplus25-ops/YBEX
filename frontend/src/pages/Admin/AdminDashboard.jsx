@@ -37,43 +37,73 @@ function AnimatedNumber({ value }) {
 const StatCard = ({ label, value, icon, color, to, delay = 0 }) => (
   <motion.div
     variants={cardVariants}
-    whileHover={{ y: -6, boxShadow: `0 20px 50px ${color}22` }}
-    whileTap={{ scale: 0.98 }}
+    whileHover={{ y: -8, boxShadow: `0 25px 60px ${color}25` }}
+    whileTap={{ scale: 0.97 }}
+    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
   >
     <Link to={to} style={{ textDecoration: 'none', display: 'block' }}>
       <div style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: `1px solid ${color}20`,
-        borderRadius: '16px',
+        background: 'linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+        border: `1px solid ${color}25`,
+        borderRadius: '20px',
         padding: '1.75rem',
         cursor: 'pointer',
         position: 'relative',
         overflow: 'hidden',
+        backdropFilter: 'blur(10px)',
       }}>
         {/* Glow corner */}
         <div style={{
           position: 'absolute', top: 0, right: 0,
-          width: '80px', height: '80px',
-          background: `radial-gradient(circle at top right, ${color}18 0%, transparent 70%)`,
+          width: '100px', height: '100px',
+          background: `radial-gradient(circle at top right, ${color}20 0%, transparent 60%)`,
           pointerEvents: 'none',
         }} />
+        
+        {/* Animated gradient border */}
+        <motion.div
+          animate={{ opacity: [0.3, 0.6, 0.3] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          style={{
+            position: 'absolute', inset: 0,
+            borderRadius: '20px',
+            padding: '1px',
+            background: `linear-gradient(135deg, ${color}40, transparent, ${color}20)`,
+            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+            WebkitMaskComposite: 'xor',
+            maskComposite: 'exclude',
+            pointerEvents: 'none',
+          }}
+        />
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
           <motion.span
-            animate={{ scale: [1, 1.15, 1] }}
-            transition={{ duration: 3, repeat: Infinity, delay }}
-            style={{ fontSize: '1.6rem' }}
+            animate={{ scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] }}
+            transition={{ duration: 4, repeat: Infinity, delay }}
+            style={{ fontSize: '1.8rem', filter: `drop-shadow(0 0 20px ${color}50)` }}
           >{icon}</motion.span>
-          <span style={{
-            background: `${color}18`, color, fontSize: '0.65rem', fontWeight: 800,
-            padding: '0.2rem 0.6rem', borderRadius: '20px', letterSpacing: '0.08em',
-            border: `1px solid ${color}30`,
-          }}>VIEW ALL</span>
+          <motion.span 
+            whileHover={{ scale: 1.05 }}
+            style={{
+              background: `linear-gradient(135deg, ${color}20, ${color}08)`, 
+              color, fontSize: '0.65rem', fontWeight: 800,
+              padding: '0.25rem 0.7rem', borderRadius: '20px', letterSpacing: '0.1em',
+              border: `1px solid ${color}35`,
+              textTransform: 'uppercase',
+            }}>View All →</motion.span>
         </div>
-        <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#fff', lineHeight: 1, marginBottom: '0.4rem' }}>
+        <div style={{ 
+          fontSize: '2.75rem', 
+          fontWeight: 800, 
+          color: '#fff', 
+          lineHeight: 1, 
+          marginBottom: '0.5rem',
+          fontFamily: "'Space Grotesk', sans-serif",
+          letterSpacing: '-0.02em',
+        }}>
           <AnimatedNumber value={value} />
         </div>
-        <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>{label}</div>
+        <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', fontWeight: 500, letterSpacing: '0.02em' }}>{label}</div>
 
         {/* Bottom accent line */}
         <motion.div

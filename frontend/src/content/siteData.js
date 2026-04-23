@@ -95,6 +95,13 @@ export const aboutHighlightCopy =
 
 export const talentProfiles = [
   {
+    name: 'Sourav Joshi',
+    role: 'Top Creator',
+    rotation: -4,
+    image:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Sourav_Joshi.jpg/440px-Sourav_Joshi.jpg',
+  },
+  {
     name: 'Aarav Mehta',
     role: 'Influencer',
     rotation: -6,

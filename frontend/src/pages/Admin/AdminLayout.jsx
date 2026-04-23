@@ -3,17 +3,18 @@ import { NavLink, useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { AuthContext } from '../../context/AuthContext';
 
-/* ── colour tokens ── */
+/* ── Premium Design Tokens ── */
 const C = {
-  bg:       '#080808',
-  header:   '#0e0e0e',
-  nav:      '#0e0e0e',
-  border:   'rgba(255,255,255,0.09)',
+  bg:       '#050505',
+  header:   '#0a0a0a',
+  nav:      '#0a0a0a',
+  border:   'rgba(255,255,255,0.06)',
   orange:   '#FF3D10',
   yellow:   '#E4F141',
   white:    '#ffffff',
-  muted:    'rgba(255,255,255,0.6)',
-  dimmed:   'rgba(255,255,255,0.3)',
+  muted:    'rgba(255,255,255,0.65)',
+  dimmed:   'rgba(255,255,255,0.35)',
+  gradient: 'linear-gradient(135deg, #FF3D10 0%, #E4F141 100%)',
 };
 
 const NAV_TABS = [
@@ -69,21 +70,62 @@ export default function AdminLayout({ children }) {
   return (
     <>
       <style>{`
-        body:has(.ybex-admin-shell) { background: ${C.bg} !important; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+        
+        body:has(.ybex-admin-shell) { 
+          background: ${C.bg} !important; 
+          font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+        }
         body:has(.ybex-admin-shell)::before { display: none !important; }
         body:has(.ybex-admin-shell) .site-header { display: none !important; }
 
-        .adm-tab { transition: color 0.15s, background 0.15s; }
-        .adm-tab:hover { color: ${C.white} !important; background: rgba(255,255,255,0.07) !important; }
+        .adm-tab { 
+          transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+          font-weight: 500;
+          letter-spacing: 0.04em;
+        }
+        .adm-tab:hover { 
+          color: ${C.yellow} !important; 
+          background: rgba(228,241,65,0.08) !important;
+        }
+        .adm-tab[data-active="true"] {
+          font-weight: 700 !important;
+        }
 
-        .adm-nav::-webkit-scrollbar { height: 2px; }
+        .adm-nav::-webkit-scrollbar { height: 3px; }
         .adm-nav::-webkit-scrollbar-track { background: transparent; }
-        .adm-nav::-webkit-scrollbar-thumb { background: rgba(228,241,65,0.3); border-radius: 4px; }
+        .adm-nav::-webkit-scrollbar-thumb { 
+          background: linear-gradient(90deg, ${C.orange}, ${C.yellow}); 
+          border-radius: 4px; 
+        }
 
-        .adm-hdr-btn { transition: background 0.15s, border-color 0.15s; }
-        .adm-hdr-btn:hover { background: rgba(255,255,255,0.09) !important; border-color: rgba(255,255,255,0.15) !important; }
+        .adm-hdr-btn { 
+          transition: all 0.2s ease;
+          font-weight: 500;
+        }
+        .adm-hdr-btn:hover { 
+          background: rgba(228,241,65,0.1) !important; 
+          border-color: rgba(228,241,65,0.3) !important; 
+          color: ${C.yellow} !important;
+          transform: translateY(-1px);
+        }
 
-        .adm-logout:hover { background: rgba(255,61,16,0.25) !important; border-color: rgba(255,61,16,0.6) !important; color: #fff !important; }
+        .adm-logout { transition: all 0.2s ease; }
+        .adm-logout:hover { 
+          background: rgba(255,61,16,0.3) !important; 
+          border-color: rgba(255,61,16,0.7) !important; 
+          color: #fff !important;
+          transform: scale(1.05);
+        }
+        
+        .adm-header {
+          background: linear-gradient(180deg, ${C.header} 0%, rgba(10,10,10,0.98) 100%) !important;
+          box-shadow: 0 4px 30px rgba(0,0,0,0.4) !important;
+        }
+        
+        .adm-logo-text {
+          font-family: 'Space Grotesk', sans-serif;
+        }
 
         @media (max-width: 640px) {
           .adm-logo-text  { display: none !important; }

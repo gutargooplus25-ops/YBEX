@@ -5,17 +5,18 @@ import axiosInstance from '../../api/axiosInstance';
 import DeleteConfirmModal from '../../components/common/DeleteConfirmModal';
 
 const ACCENT = '#e4f141';
-const BORDER = 'rgba(255,255,255,0.08)';
-const MUTED  = 'rgba(255,255,255,0.35)';
-const DIM    = 'rgba(255,255,255,0.12)';
+const BORDER = 'rgba(255,255,255,0.06)';
+const MUTED  = 'rgba(255,255,255,0.55)';
+const DIM    = 'rgba(255,255,255,0.1)';
 
 const inp = {
-  width: '100%', padding: '0.85rem 1rem',
+  width: '100%', padding: '0.9rem 1.1rem',
   background: 'rgba(255,255,255,0.04)',
-  border: `1px solid ${DIM}`, borderRadius: '12px',
-  color: '#fff', fontSize: '0.88rem', outline: 'none',
-  boxSizing: 'border-box', transition: 'border-color .2s, box-shadow .2s',
-  fontFamily: 'inherit',
+  border: `1px solid ${DIM}`, borderRadius: '14px',
+  color: '#fff', fontSize: '0.9rem', outline: 'none',
+  boxSizing: 'border-box', transition: 'all 0.25s cubic-bezier(0.22, 1, 0.36, 1)',
+  fontFamily: "'Inter', system-ui, sans-serif",
+  fontWeight: 400,
 };
 const focus = (e) => { e.target.style.borderColor = ACCENT; e.target.style.boxShadow = '0 0 0 3px rgba(228,241,65,0.08)'; };
 const blur  = (e) => { e.target.style.borderColor = DIM;    e.target.style.boxShadow = 'none'; };
@@ -213,15 +214,52 @@ export default function AdminBrands() {
         style={{ marginBottom: '2rem', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}
       >
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(228,241,65,0.1)', border: '1px solid rgba(228,241,65,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>🏷️</div>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', margin: 0 }}>Brands</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
+            <motion.div 
+              animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ 
+                width: '44px', 
+                height: '44px', 
+                borderRadius: '14px', 
+                background: 'linear-gradient(135deg, rgba(228,241,65,0.15) 0%, rgba(228,241,65,0.05) 100%)',
+                border: '1px solid rgba(228,241,65,0.25)',
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                fontSize: '1.4rem',
+                boxShadow: '0 8px 32px rgba(228,241,65,0.15)',
+              }}
+            >🏷️</motion.div>
+            <h1 style={{ 
+              fontSize: '1.6rem', 
+              fontWeight: 800, 
+              color: '#fff', 
+              letterSpacing: '-0.03em', 
+              margin: 0,
+              fontFamily: "'Space Grotesk', sans-serif",
+            }}>Brands</h1>
           </div>
-          <p style={{ color: MUTED, fontSize: '0.79rem', margin: 0, paddingLeft: '46px' }}>{brands.length} brand{brands.length !== 1 ? 's' : ''} · shown on homepage marquee</p>
+          <p style={{ color: MUTED, fontSize: '0.85rem', margin: 0, paddingLeft: '56px' }}>{brands.length} brand{brands.length !== 1 ? 's' : ''} · shown on homepage marquee</p>
         </div>
-        <motion.button whileHover={{ scale: 1.05, boxShadow: '0 10px 30px rgba(228,241,65,0.32)' }} whileTap={{ scale: 0.96 }}
+        <motion.button 
+          whileHover={{ scale: 1.03, boxShadow: '0 12px 35px rgba(228,241,65,0.35)' }} 
+          whileTap={{ scale: 0.97 }}
           onClick={() => setModal(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.72rem 1.45rem', background: ACCENT, border: 'none', borderRadius: '12px', color: '#000', fontSize: '0.85rem', fontWeight: 800, cursor: 'pointer' }}
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '10px', 
+            padding: '0.85rem 1.6rem', 
+            background: 'linear-gradient(135deg, #e4f141 0%, #d4e130 100%)', 
+            border: 'none', 
+            borderRadius: '14px', 
+            color: '#000', 
+            fontSize: '0.9rem', 
+            fontWeight: 700, 
+            cursor: 'pointer',
+            boxShadow: '0 4px 20px rgba(228,241,65,0.2)',
+          }}
         >+ Add Brand</motion.button>
       </motion.div>
 
@@ -232,19 +270,29 @@ export default function AdminBrands() {
       </motion.div>
 
       {loading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(180px,1fr))', gap: '1.1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: '1.25rem' }}>
           {[...Array(6)].map((_, i) => (
-            <motion.div key={i} animate={{ opacity: [0.12, 0.38, 0.12] }} transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.13 }}
-              style={{ height: '224px', borderRadius: '20px', background: 'rgba(255,255,255,0.03)', border: '1px solid ' + BORDER }} />
+            <motion.div key={i} animate={{ opacity: [0.15, 0.4, 0.15] }} transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.15 }}
+              style={{ height: '260px', borderRadius: '24px', background: 'linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)', border: '1px solid ' + BORDER }} />
           ))}
         </div>
       ) : brands.length === 0 ? (
-        <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }}
-          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid ' + BORDER, borderRadius: '20px', padding: '5rem 2rem', textAlign: 'center' }}
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
+          style={{ 
+            background: 'linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)', 
+            border: '1px solid ' + BORDER, 
+            borderRadius: '24px', 
+            padding: '5rem 2rem', 
+            textAlign: 'center',
+          }}
         >
-          <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🏷️</div>
-          <div style={{ color: 'rgba(255,255,255,0.28)', fontSize: '0.95rem', fontWeight: 600, marginBottom: '6px' }}>No brands yet</div>
-          <div style={{ color: 'rgba(255,255,255,0.16)', fontSize: '0.78rem' }}>Click Add Brand to add your first brand partner.</div>
+          <motion.div 
+            animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+            transition={{ duration: 3, repeat: Infinity }}
+            style={{ fontSize: '3.5rem', marginBottom: '1.5rem', filter: 'drop-shadow(0 0 30px rgba(228,241,65,0.3))' }}
+          >🏷️</motion.div>
+          <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1.1rem', fontWeight: 600, marginBottom: '8px' }}>No brands yet</div>
+          <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.9rem' }}>Click Add Brand to add your first brand partner.</div>
         </motion.div>
       ) : (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
