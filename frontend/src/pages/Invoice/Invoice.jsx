@@ -11,9 +11,10 @@ const steps = [
   { id: 1, title: 'The Basics',  subtitle: 'Give it a number. Make it real.',    icon: FileText  },
   { id: 2, title: 'Who & Where', subtitle: 'Your details vs. Their details.',     icon: User      },
   { id: 3, title: "What's Sold", subtitle: 'List your items. Be descriptive.',    icon: Receipt   },
-  { id: 4, title: 'Bank Details',subtitle: 'Where should they send money?',       icon: Landmark  },
-  { id: 5, title: 'Review',      subtitle: 'Preview before you send.',            icon: Eye       },
-  { id: 6, title: 'Done',        subtitle: 'Ready to download & send.',           icon: FileCheck },
+  { id: 4, title: 'Appearance',  subtitle: 'Logo, signature & final touches.',    icon: Sparkles  },
+  { id: 5, title: 'Accounts',    subtitle: 'Where should they send money?',       icon: Landmark  },
+  { id: 6, title: 'Review',      subtitle: 'Preview before you send.',            icon: Eye       },
+  { id: 7, title: 'Done',        subtitle: 'Ready to download & send.',           icon: FileCheck },
 ];
 
 // ─── Step 1 ───────────────────────────────────────────────────────────────────
@@ -221,7 +222,18 @@ function Step3({ invoiceData, setInvoiceData, subtotal, tax, grandTotal }) {
         <button className="add-item-btn" onClick={addItem}><Plus size={20} />Add Item</button>
         <div className="items-total">
           <div className="total-row"><span>Subtotal</span><span>₹{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span></div>
-          <div className="total-row"><span>GST (18%)</span><span>₹{tax.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span></div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.3rem 0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.65)' }}>GST</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <input type="number" min="0" max="100" value={invoiceData.gstPercent}
+                  onChange={e => setInvoiceData(p => ({ ...p, gstPercent: parseFloat(e.target.value) || 0 }))}
+                  style={{ width: '52px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', color: '#fff', padding: '0.2rem 0.4rem', fontSize: '0.82rem', outline: 'none', textAlign: 'center', fontFamily: 'inherit' }} />
+                <span style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)' }}>%</span>
+              </div>
+            </div>
+            <span style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.65)' }}>₹{tax.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+          </div>
           <div className="total-row grand-total"><span>Total</span><span>₹{grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span></div>
         </div>
       </div>
@@ -229,55 +241,222 @@ function Step3({ invoiceData, setInvoiceData, subtotal, tax, grandTotal }) {
   );
 }
 
-// ─── Step 4 ───────────────────────────────────────────────────────────────────
-function Step4({ invoiceData, updateInvoiceData }) {
+// ─── Step 4: Appearance ──────────────────────────────────────────────────────
+function Step4({ invoiceData, setInvoiceData }) {
+  const fileRef = React.useRef(null);
+  const sigRef  = React.useRef(null);
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setInvoiceData(p => ({ ...p, appearance: { ...p.appearance, logoImage: ev.target.result, logoType: 'image' } }));
+    reader.readAsDataURL(file);
+  };
+
+  const handleSigUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setInvoiceData(p => ({ ...p, appearance: { ...p.appearance, signatureImage: ev.target.result, signatureType: 'image' } }));
+    reader.readAsDataURL(file);
+  };
+
+  const ap = invoiceData.appearance;
+
   return (
     <div className="step-content">
       <div className="step-header-card">
-        <div className="step-icon-large"><Landmark size={28} /></div>
-        <div><h3>STEP 4: BANK DETAILS</h3><p>Make it official. Add your payment information.</p></div>
+        <div className="step-icon-large"><Sparkles size={28} /></div>
+        <div><h3>STEP 4: APPEARANCE</h3><p>Logo, signature & final touches.</p></div>
       </div>
+
+      {/* Logo Setup */}
       <div className="form-section">
-        <div className="form-header"><Receipt size={20} /><h4>PAYMENT INFORMATION</h4></div>
-        <div className="form-field">
-          <label>ACCOUNT HOLDER NAME</label>
-          <input type="text" value={invoiceData.bankDetails.accountName}
-            onChange={e => updateInvoiceData('bankDetails', 'accountName', e.target.value)} />
+        <div className="form-header"><Building size={20} /><h4>LOGO SETUP</h4></div>
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.9rem' }}>
+          {['text','image'].map(t => (
+            <button key={t} onClick={() => setInvoiceData(p => ({ ...p, appearance: { ...p.appearance, logoType: t } }))}
+              style={{ padding: '0.4rem 1rem', borderRadius: '8px', border: `1px solid ${ap.logoType === t ? '#FF3D10' : 'rgba(255,255,255,0.12)'}`, background: ap.logoType === t ? '#FF3D10' : 'rgba(255,255,255,0.04)', color: ap.logoType === t ? '#fff' : 'rgba(255,255,255,0.5)', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              {t === 'text' ? '✏ Text' : '🖼 Image'}
+            </button>
+          ))}
         </div>
-        <div className="form-field">
-          <label>ACCOUNT NUMBER</label>
-          <input type="text" value={invoiceData.bankDetails.accountNumber}
-            onChange={e => updateInvoiceData('bankDetails', 'accountNumber', e.target.value)} />
-        </div>
-        <div className="form-grid">
+        {ap.logoType === 'text' ? (
           <div className="form-field">
-            <label>BANK NAME</label>
-            <input type="text" value={invoiceData.bankDetails.bankName}
-              onChange={e => updateInvoiceData('bankDetails', 'bankName', e.target.value)} />
+            <label>ORGANIZATION NAME</label>
+            <input type="text" value={ap.logoText}
+              onChange={e => setInvoiceData(p => ({ ...p, appearance: { ...p.appearance, logoText: e.target.value } }))}
+              placeholder="e.g. YBEX" />
           </div>
+        ) : (
+          <div>
+            <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleLogoUpload} />
+            {ap.logoImage ? (
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <img src={ap.logoImage} alt="logo" style={{ maxHeight: '80px', maxWidth: '200px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                <button onClick={() => setInvoiceData(p => ({ ...p, appearance: { ...p.appearance, logoImage: '' } }))}
+                  style={{ position: 'absolute', top: '-8px', right: '-8px', width: '22px', height: '22px', borderRadius: '50%', background: '#FF3D10', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '0.7rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+              </div>
+            ) : (
+              <button onClick={() => fileRef.current?.click()}
+                style={{ padding: '0.6rem 1.2rem', background: 'rgba(255,255,255,0.04)', border: '1px dashed rgba(255,255,255,0.2)', borderRadius: '8px', color: 'rgba(255,255,255,0.5)', fontSize: '0.82rem', cursor: 'pointer' }}>
+                + Upload Logo Image
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Signature */}
+      <div className="form-section">
+        <div className="form-header"><FileCheck size={20} /><h4>SIGNATURE</h4></div>
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.9rem' }}>
+          {['text','image'].map(t => (
+            <button key={t} onClick={() => setInvoiceData(p => ({ ...p, appearance: { ...p.appearance, signatureType: t } }))}
+              style={{ padding: '0.4rem 1rem', borderRadius: '8px', border: `1px solid ${ap.signatureType === t ? '#FF3D10' : 'rgba(255,255,255,0.12)'}`, background: ap.signatureType === t ? '#FF3D10' : 'rgba(255,255,255,0.04)', color: ap.signatureType === t ? '#fff' : 'rgba(255,255,255,0.5)', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              {t === 'text' ? '✏ Text' : '🖼 Image'}
+            </button>
+          ))}
+        </div>
+        {ap.signatureType === 'text' ? (
           <div className="form-field">
-            <label>IFSC CODE</label>
-            <input type="text" value={invoiceData.bankDetails.ifsc}
-              onChange={e => updateInvoiceData('bankDetails', 'ifsc', e.target.value)} />
+            <label>AUTHORISED PERSON NAME</label>
+            <input type="text" value={ap.signatureText}
+              onChange={e => setInvoiceData(p => ({ ...p, appearance: { ...p.appearance, signatureText: e.target.value } }))}
+              placeholder="e.g. John Doe" />
           </div>
+        ) : (
+          <div>
+            <input ref={sigRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleSigUpload} />
+            {ap.signatureImage ? (
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <img src={ap.signatureImage} alt="signature" style={{ maxHeight: '80px', maxWidth: '200px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                <button onClick={() => setInvoiceData(p => ({ ...p, appearance: { ...p.appearance, signatureImage: '' } }))}
+                  style={{ position: 'absolute', top: '-8px', right: '-8px', width: '22px', height: '22px', borderRadius: '50%', background: '#FF3D10', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '0.7rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+              </div>
+            ) : (
+              <button onClick={() => sigRef.current?.click()}
+                style={{ padding: '0.6rem 1.2rem', background: 'rgba(255,255,255,0.04)', border: '1px dashed rgba(255,255,255,0.2)', borderRadius: '8px', color: 'rgba(255,255,255,0.5)', fontSize: '0.82rem', cursor: 'pointer' }}>
+                + Upload Signature Image
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Final Touches */}
+      <div className="form-section">
+        <div className="form-header"><FileText size={20} /><h4>FINAL TOUCHES</h4></div>
+        <div className="form-field">
+          <label>NOTES</label>
+          <textarea rows={2} value={ap.notes}
+            onChange={e => setInvoiceData(p => ({ ...p, appearance: { ...p.appearance, notes: e.target.value } }))}
+            placeholder="Thank you for your business!" />
         </div>
         <div className="form-field">
-          <label>BRANCH (OPTIONAL)</label>
-          <input type="text" value={invoiceData.bankDetails.branch}
-            onChange={e => updateInvoiceData('bankDetails', 'branch', e.target.value)} />
+          <label>TERMS</label>
+          <textarea rows={2} value={ap.terms}
+            onChange={e => setInvoiceData(p => ({ ...p, appearance: { ...p.appearance, terms: e.target.value } }))}
+            placeholder="Payment is due within 15 days." />
         </div>
       </div>
     </div>
   );
 }
 
-// ─── Step 5 ───────────────────────────────────────────────────────────────────
-function Step5({ invoiceData, grandTotal }) {
+// ─── Step 5: Accounts ─────────────────────────────────────────────────────────
+function Step5({ invoiceData, setInvoiceData, updateInvoiceData }) {
+  const method = invoiceData.paymentMethod || 'skip';
+
+  return (
+    <div className="step-content">
+      <div className="step-header-card">
+        <div className="step-icon-large"><Landmark size={28} /></div>
+        <div><h3>STEP 5: ACCOUNTS</h3><p>Choose how your client should pay you.</p></div>
+      </div>
+
+      {/* Payment method selector */}
+      <div className="form-section">
+        <div className="form-header"><Receipt size={20} /><h4>PAYMENT METHOD</h4></div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
+          {[
+            { key: 'skip',          label: 'QR Code',       icon: '⊗',  color: '#FF3D10' },
+            { key: 'bank',          label: 'Bank Transfer',  icon: '🏦', color: '#FF3D10' },
+            { key: 'upi',           label: 'UPI / QR',       icon: '📱', color: '#00D26A' },
+          ].map(opt => (
+            <button key={opt.key}
+              onClick={() => setInvoiceData(p => ({ ...p, paymentMethod: opt.key }))}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '1rem 0.5rem', background: method === opt.key ? opt.color : 'rgba(255,255,255,0.04)', border: `1px solid ${method === opt.key ? opt.color : 'rgba(255,255,255,0.1)'}`, borderRadius: '14px', color: method === opt.key ? '#fff' : 'rgba(255,255,255,0.5)', fontSize: '0.68rem', fontWeight: 800, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.06em', transition: 'all 0.2s', boxShadow: method === opt.key ? `0 4px 18px ${opt.color}40` : 'none' }}>
+              <span style={{ fontSize: '1.5rem' }}>{opt.icon}</span>
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        {method === 'skip' && (
+          <div style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.25)', fontSize: '0.85rem' }}>
+            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⊗</div>
+            No payment info will be shown
+          </div>
+        )}
+
+        {method === 'bank' && (
+          <div>
+            <div className="form-field">
+              <label>OFFICIAL BANK NAME</label>
+              <input type="text" value={invoiceData.bankDetails.bankName} placeholder="e.g. HDFC Bank Ltd."
+                onChange={e => updateInvoiceData('bankDetails', 'bankName', e.target.value)} />
+            </div>
+            <div className="form-field">
+              <label>ACCOUNT HOLDER NAME</label>
+              <input type="text" value={invoiceData.bankDetails.accountName} placeholder="As per bank records"
+                onChange={e => updateInvoiceData('bankDetails', 'accountName', e.target.value)} />
+            </div>
+            <div className="form-grid">
+              <div className="form-field">
+                <label>ACCOUNT NUMBER</label>
+                <input type="text" value={invoiceData.bankDetails.accountNumber} placeholder="0000 0000 00"
+                  onChange={e => updateInvoiceData('bankDetails', 'accountNumber', e.target.value)} />
+              </div>
+              <div className="form-field">
+                <label>IFSC CODE</label>
+                <input type="text" value={invoiceData.bankDetails.ifsc} placeholder="IFSC000XXX"
+                  onChange={e => updateInvoiceData('bankDetails', 'ifsc', e.target.value)} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {method === 'upi' && (
+          <div>
+            <div className="form-field">
+              <label>UPI ID</label>
+              <input type="text" value={invoiceData.bankDetails.upiId || ''} placeholder="yourname@upi"
+                onChange={e => updateInvoiceData('bankDetails', 'upiId', e.target.value)} />
+            </div>
+            <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>QR Code Preview</div>
+              {/* QR placeholder — random pattern */}
+              <div style={{ width: '100px', height: '100px', margin: '0 auto', background: 'repeating-conic-gradient(#333 0% 25%, #111 0% 50%) 0 0 / 10px 10px', borderRadius: '6px', border: '3px solid #fff', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', inset: '20%', background: '#fff', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.5rem', color: '#000', fontWeight: 900 }}>UPI</div>
+              </div>
+              <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.5rem' }}>{invoiceData.bankDetails.upiId || 'Enter UPI ID above'}</div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Step 6: Review ──────────────────────────────────────────────────────────
+function Step6({ invoiceData, grandTotal }) {
   return (
     <div className="step-content">
       <div className="step-header-card">
         <div className="step-icon-large"><Eye size={28} /></div>
-        <div><h3>STEP 5: REVIEW</h3><p>Preview before you send. Make sure everything looks perfect.</p></div>
+        <div><h3>STEP 6: REVIEW</h3><p>Preview before you send. Make sure everything looks perfect.</p></div>
       </div>
       <div className="review-section">
         <div className="review-card">
@@ -482,7 +661,7 @@ function ShareModal({ open, onClose, invoiceData, subtotal, tax, grandTotal, pre
     { id: 'twitter',  label: 'Twitter/X',          color: '#1DA1F2', icon: '🐦' },
     { id: 'facebook', label: 'Facebook',           color: '#1877F2', icon: '📘' },
     { id: 'telegram', label: 'Telegram',           color: '#0088CC', icon: '✈️' },
-    { id: 'copy',     label: copied ? 'Copied!' : 'Copy', color: '#e4f141', icon: copied ? '✅' : '📋' },
+    { id: 'copy',     label: copied ? 'Copied!' : 'Copy', color: '#FF3D10', icon: copied ? '✅' : '📋' },
   ];
 
   const handleShare = async (platform) => {
@@ -492,27 +671,35 @@ function ShareModal({ open, onClose, invoiceData, subtotal, tax, grandTotal, pre
       const fileName = `${invoiceData.invoiceNumber || 'Invoice'}.pdf`;
       const text = `Invoice ${invoiceData.invoiceNumber || ''} from ${invoiceData.billedBy.name || 'YBEX'} — Amount: ₹${Number(grandTotal).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
 
+      // Try native share with file first (works on mobile for all platforms)
       if (platform === 'native' && navigator.share) {
         const file = new File([blob], fileName, { type: 'application/pdf' });
-        await navigator.share({ title: `Invoice ${invoiceData.invoiceNumber}`, text, files: [file] });
+        const canShareFiles = navigator.canShare && navigator.canShare({ files: [file] });
+        if (canShareFiles) {
+          await navigator.share({ title: `Invoice ${invoiceData.invoiceNumber}`, text, files: [file] });
+        } else {
+          await navigator.share({ title: `Invoice ${invoiceData.invoiceNumber}`, text });
+        }
         onClose(); return;
       }
 
+      // For all platforms: download the PDF first, then open share URL
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url; a.download = fileName; a.click();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
 
       const enc = encodeURIComponent;
+      const shareText = `${text}\n\nInvoice PDF has been downloaded to your device.`;
       const urls = {
-        whatsapp: `https://wa.me/?text=${enc(text)}`,
-        gmail:    `mailto:?subject=${enc('Invoice ' + (invoiceData.invoiceNumber || ''))}&body=${enc(text)}`,
+        whatsapp: `https://wa.me/?text=${enc(shareText)}`,
+        gmail:    `mailto:?subject=${enc('Invoice ' + (invoiceData.invoiceNumber || ''))}&body=${enc(shareText)}`,
         twitter:  `https://twitter.com/intent/tweet?text=${enc(text)}`,
         facebook: `https://www.facebook.com/sharer/sharer.php?quote=${enc(text)}`,
-        telegram: `https://t.me/share/url?url=${enc(window.location.href)}&text=${enc(text)}`,
+        telegram: `https://t.me/share/url?url=${enc(window.location.href)}&text=${enc(shareText)}`,
       };
 
       if (platform === 'copy') {
-        await navigator.clipboard.writeText(text);
+        await navigator.clipboard.writeText(shareText);
         setCopied(true); setTimeout(() => setCopied(false), 2000);
       } else if (urls[platform]) {
         window.open(urls[platform], '_blank');
@@ -526,9 +713,9 @@ function ShareModal({ open, onClose, invoiceData, subtotal, tax, grandTotal, pre
   return (
     <div onClick={e => e.target === e.currentTarget && onClose()}
       style={{ position:'fixed', inset:0, zIndex:99999, background:'rgba(0,0,0,0.88)', backdropFilter:'blur(18px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem' }}>
-      <div style={{ position:'absolute', top:'10%', left:'50%', transform:'translateX(-50%)', width:'500px', height:'250px', background:'radial-gradient(ellipse,rgba(0,102,204,0.18) 0%,transparent 70%)', pointerEvents:'none', borderRadius:'50%' }} />
-      <div style={{ position:'relative', width:'100%', maxWidth:'420px', background:'linear-gradient(160deg,#0f0f0f 0%,#0a0a0a 100%)', border:'1px solid rgba(0,102,204,0.28)', borderRadius:'22px', overflow:'hidden', boxShadow:'0 48px 96px rgba(0,0,0,0.9)' }}>
-        <div style={{ height:'2px', background:'linear-gradient(90deg,transparent,#0066cc,transparent)' }} />
+      <div style={{ position:'absolute', top:'10%', left:'50%', transform:'translateX(-50%)', width:'500px', height:'250px', background:'radial-gradient(ellipse,rgba(255,61,16,0.15) 0%,transparent 70%)', pointerEvents:'none', borderRadius:'50%' }} />
+      <div style={{ position:'relative', width:'100%', maxWidth:'420px', background:'linear-gradient(160deg,#0f0f0f 0%,#0a0a0a 100%)', border:'1px solid rgba(255,61,16,0.25)', borderRadius:'22px', overflow:'hidden', boxShadow:'0 48px 96px rgba(0,0,0,0.9)' }}>
+        <div style={{ height:'2px', background:'linear-gradient(90deg,transparent,#FF3D10,transparent)' }} />
         <div style={{ padding:'1.5rem 1.75rem 1.25rem', borderBottom:'1px solid rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
           <div>
             <div style={{ fontSize:'1.05rem', fontWeight:900, color:'#fff', letterSpacing:'-0.02em' }}>Share Invoice</div>
@@ -551,7 +738,7 @@ function ShareModal({ open, onClose, invoiceData, subtotal, tax, grandTotal, pre
         {typeof navigator !== 'undefined' && navigator.share && (
           <div style={{ padding:'0 1.75rem 1.5rem' }}>
             <button onClick={() => handleShare('native')} disabled={!!sharing}
-              style={{ width:'100%', padding:'0.8rem', background:'rgba(0,102,204,0.15)', border:'1px solid rgba(0,102,204,0.35)', borderRadius:'11px', color:'#4da6ff', fontSize:'0.85rem', fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px' }}>
+              style={{ width:'100%', padding:'0.8rem', background:'rgba(255,61,16,0.12)', border:'1px solid rgba(255,61,16,0.35)', borderRadius:'11px', color:'#FF3D10', fontSize:'0.85rem', fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px' }}>
               📱 Share via Device
             </button>
           </div>
@@ -561,8 +748,8 @@ function ShareModal({ open, onClose, invoiceData, subtotal, tax, grandTotal, pre
   );
 }
 
-// ─── Step 6 ───────────────────────────────────────────────────────────────────
-function Step6({ invoiceData, subtotal, tax, grandTotal, previewRef }) {
+// ─── Step 7: Done ────────────────────────────────────────────────────────────
+function Step7({ invoiceData, subtotal, tax, grandTotal, previewRef }) {
   const [shareOpen, setShareOpen] = React.useState(false);
   const [saved,     setSaved]     = React.useState(false);
 
@@ -669,117 +856,149 @@ function InvoicePreview({ invoiceData, subtotal, tax, grandTotal }) {
     ? new Date(invoiceData.dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
     : null;
 
+  const ap = invoiceData.appearance || {};
+  const payMethod = invoiceData.paymentMethod || 'skip';
+  const gstPct = invoiceData.gstPercent ?? 18;
+
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', color: '#000', fontSize: '10px', lineHeight: 1.4 }}>
-      {/* Blue header */}
-      <div style={{ background: '#003366', padding: '14px 16px 10px', borderRadius: '6px 6px 0 0', marginBottom: 0 }}>
-        <div style={{ background: '#0066cc', height: '3px', borderRadius: '2px', marginBottom: '10px' }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-          <div>
-            <div style={{ fontSize: '22px', fontWeight: 900, color: '#fff', letterSpacing: '0.05em' }}>INVOICE</div>
-            {invoiceData.invoiceType && invoiceData.invoiceType !== 'Standard' && (
-              <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.6)', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{invoiceData.invoiceType}</div>
-            )}
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '9px' }}>NO.</div>
-            <div style={{ color: '#fff', fontWeight: 700, fontSize: '12px' }}>{invoiceData.invoiceNumber || 'INV-001'}</div>
-            {invoiceData.referenceNumber && (
-              <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: '8px', marginTop: '2px' }}>REF: {invoiceData.referenceNumber}</div>
-            )}
-          </div>
+    <div style={{ fontFamily: 'Arial, sans-serif', color: '#000', fontSize: '10px', lineHeight: 1.4, background: '#fff' }}>
+
+      {/* ── HEADER: logo + invoice number ── */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', paddingBottom: '10px', borderBottom: '2px solid #000' }}>
+        <div>
+          {/* Logo */}
+          {ap.logoType === 'image' && ap.logoImage ? (
+            <img src={ap.logoImage} alt="logo" style={{ maxHeight: '50px', maxWidth: '160px', objectFit: 'contain', display: 'block', marginBottom: '4px' }} />
+          ) : (
+            <div style={{ fontSize: '22px', fontWeight: 900, color: '#000', letterSpacing: '-0.02em', marginBottom: '2px' }}>
+              {ap.logoText || invoiceData.billedBy.name || 'YBEX'}
+            </div>
+          )}
+          <div style={{ fontSize: '7px', color: '#555', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Professional Billing Suite</div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: '8px', color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Invoice No.</div>
+          <div style={{ fontSize: '13px', fontWeight: 900, color: '#000' }}>#{invoiceData.invoiceNumber || 'INV-001'}</div>
+          {invoiceData.referenceNumber && <div style={{ fontSize: '7px', color: '#888', marginTop: '2px' }}>REF: {invoiceData.referenceNumber}</div>}
         </div>
       </div>
 
-      {/* Light blue accent bar */}
-      <div style={{ background: '#0066cc', height: '4px', marginBottom: '14px' }} />
-
-      {/* Bill To / From */}
+      {/* ── SENDER / CLIENT ── */}
       <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: '8px', fontWeight: 700, color: '#003366', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px', borderBottom: '1px solid #0066cc', paddingBottom: '2px' }}>Bill To</div>
-          <div style={{ fontWeight: 700, fontSize: '11px', color: '#111', marginBottom: '2px' }}>{invoiceData.billedTo.name || <span style={{ color: '#bbb' }}>Client Name</span>}</div>
-          {invoiceData.billedTo.phone && <div style={{ color: '#555', fontSize: '9px' }}>{invoiceData.billedTo.phone}</div>}
-          {invoiceData.billedTo.email && <div style={{ color: '#555', fontSize: '9px' }}>{invoiceData.billedTo.email}</div>}
-          {invoiceData.billedTo.address && (
-            <div style={{ color: '#555', fontSize: '9px', whiteSpace: 'pre-line' }}>{invoiceData.billedTo.address}</div>
-          )}
-          {invoiceData.billedTo.gstin && <div style={{ color: '#777', fontSize: '8px', marginTop: '2px' }}>GSTIN: {invoiceData.billedTo.gstin}</div>}
+          <div style={{ fontSize: '7px', fontWeight: 800, color: '#888', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>Sender Details</div>
+          <div style={{ fontWeight: 700, fontSize: '10px', color: '#000', marginBottom: '2px' }}>{invoiceData.billedBy.name || <span style={{ color: '#bbb' }}>Your Name</span>}</div>
+          {invoiceData.billedBy.address && <div style={{ color: '#555', fontSize: '8px', whiteSpace: 'pre-line' }}>{invoiceData.billedBy.address}</div>}
+          {invoiceData.billedBy.gstin && <div style={{ color: '#777', fontSize: '7px', marginTop: '2px' }}>GSTIN: {invoiceData.billedBy.gstin}</div>}
         </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: '8px', fontWeight: 700, color: '#003366', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px', borderBottom: '1px solid #0066cc', paddingBottom: '2px' }}>From</div>
-          <div style={{ fontWeight: 700, fontSize: '11px', color: '#111', marginBottom: '2px' }}>{invoiceData.billedBy.name || <span style={{ color: '#bbb' }}>Your Name</span>}</div>
-          {invoiceData.billedBy.phone && <div style={{ color: '#555', fontSize: '9px' }}>{invoiceData.billedBy.phone}</div>}
-          {invoiceData.billedBy.email && <div style={{ color: '#555', fontSize: '9px' }}>{invoiceData.billedBy.email}</div>}
-          {invoiceData.billedBy.address && (
-            <div style={{ color: '#555', fontSize: '9px', whiteSpace: 'pre-line' }}>{invoiceData.billedBy.address}</div>
-          )}
-          {invoiceData.billedBy.gstin && <div style={{ color: '#777', fontSize: '8px', marginTop: '2px' }}>GSTIN: {invoiceData.billedBy.gstin}</div>}
+        <div style={{ flex: 1, textAlign: 'right' }}>
+          <div style={{ fontSize: '7px', fontWeight: 800, color: '#888', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>Client Details</div>
+          <div style={{ fontWeight: 700, fontSize: '10px', color: '#000', marginBottom: '2px' }}>{invoiceData.billedTo.name || <span style={{ color: '#bbb' }}>Client Name</span>}</div>
+          {invoiceData.billedTo.address && <div style={{ color: '#555', fontSize: '8px', whiteSpace: 'pre-line' }}>{invoiceData.billedTo.address}</div>}
+          {invoiceData.billedTo.gstin && <div style={{ color: '#777', fontSize: '7px', marginTop: '2px' }}>GSTIN: {invoiceData.billedTo.gstin}</div>}
         </div>
       </div>
 
-      {/* Date row */}
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '14px', fontSize: '9px', color: '#444' }}>
-        <div><span style={{ fontWeight: 700, color: '#003366' }}>Date: </span>{dateStr}</div>
-        {dueDateStr && <div><span style={{ fontWeight: 700, color: '#003366' }}>Due: </span>{dueDateStr}</div>}
-        {invoiceData.placeOfSupply && <div><span style={{ fontWeight: 700, color: '#003366' }}>Place: </span>{invoiceData.placeOfSupply}</div>}
+      {/* ── DATES ── */}
+      <div style={{ display: 'flex', gap: '20px', marginBottom: '12px', fontSize: '8px', color: '#444' }}>
+        <div><span style={{ fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '7px' }}>Issue Date</span><br /><strong>{dateStr}</strong></div>
+        {dueDateStr && <div><span style={{ fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '7px' }}>Payment Deadline</span><br /><strong>{dueDateStr}</strong></div>}
+        {invoiceData.placeOfSupply && <div><span style={{ fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '7px' }}>Place of Supply</span><br /><strong>{invoiceData.placeOfSupply}</strong></div>}
       </div>
 
-      {/* Items table */}
+      {/* ── ITEMS TABLE ── */}
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '10px', fontSize: '9px' }}>
         <thead>
-          <tr style={{ background: '#0066cc' }}>
-            <th style={{ padding: '5px 6px', textAlign: 'left', color: '#fff', fontWeight: 700, fontSize: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description</th>
-            <th style={{ padding: '5px 6px', textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: '8px', textTransform: 'uppercase', letterSpacing: '0.05em', width: '30px' }}>Qty</th>
-            <th style={{ padding: '5px 6px', textAlign: 'right', color: '#fff', fontWeight: 700, fontSize: '8px', textTransform: 'uppercase', letterSpacing: '0.05em', width: '60px' }}>Rate</th>
-            <th style={{ padding: '5px 6px', textAlign: 'right', color: '#fff', fontWeight: 700, fontSize: '8px', textTransform: 'uppercase', letterSpacing: '0.05em', width: '60px' }}>Amount</th>
+          <tr style={{ borderBottom: '2px solid #000' }}>
+            <th style={{ padding: '5px 4px', textAlign: 'left', color: '#000', fontWeight: 800, fontSize: '8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Description</th>
+            <th style={{ padding: '5px 4px', textAlign: 'center', color: '#000', fontWeight: 800, fontSize: '8px', textTransform: 'uppercase', letterSpacing: '0.06em', width: '30px' }}>QTY</th>
+            <th style={{ padding: '5px 4px', textAlign: 'right', color: '#000', fontWeight: 800, fontSize: '8px', textTransform: 'uppercase', letterSpacing: '0.06em', width: '60px' }}>Rate</th>
+            <th style={{ padding: '5px 4px', textAlign: 'right', color: '#000', fontWeight: 800, fontSize: '8px', textTransform: 'uppercase', letterSpacing: '0.06em', width: '60px' }}>Amount</th>
           </tr>
         </thead>
         <tbody>
           {invoiceData.items.map((item, idx) => (
-            <tr key={item.id} style={{ background: idx % 2 === 1 ? '#f0f5fa' : '#fff' }}>
-              <td style={{ padding: '5px 6px', color: '#222', borderBottom: '1px solid #e8eef5' }}>{item.description || <span style={{ color: '#bbb' }}>Item description</span>}</td>
-              <td style={{ padding: '5px 6px', textAlign: 'center', color: '#444', borderBottom: '1px solid #e8eef5' }}>{item.quantity}</td>
-              <td style={{ padding: '5px 6px', textAlign: 'right', color: '#444', borderBottom: '1px solid #e8eef5' }}>₹{fmtMoney(item.rate)}</td>
-              <td style={{ padding: '5px 6px', textAlign: 'right', color: '#222', fontWeight: 600, borderBottom: '1px solid #e8eef5' }}>₹{fmtMoney(Number(item.quantity) * Number(item.rate))}</td>
+            <tr key={item.id} style={{ borderBottom: '1px solid #eee' }}>
+              <td style={{ padding: '5px 4px', color: '#222' }}><strong>{item.description || <span style={{ color: '#bbb' }}>Description...</span>}</strong></td>
+              <td style={{ padding: '5px 4px', textAlign: 'center', color: '#444' }}>{item.quantity}</td>
+              <td style={{ padding: '5px 4px', textAlign: 'right', color: '#444' }}>INR {fmtMoney(item.rate)}</td>
+              <td style={{ padding: '5px 4px', textAlign: 'right', color: '#000', fontWeight: 700 }}>INR {fmtMoney(Number(item.quantity) * Number(item.rate))}</td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {/* Totals */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '14px' }}>
-        <div style={{ width: '160px', border: '1px solid #0066cc', borderRadius: '4px', overflow: 'hidden' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 8px', fontSize: '9px', color: '#444' }}>
-            <span>Subtotal</span><span>₹{fmtMoney(subtotal)}</span>
+      {/* ── TOTALS + PAYMENT ── */}
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '14px', alignItems: 'flex-start' }}>
+        {/* Payment info left */}
+        <div style={{ flex: 1 }}>
+          {payMethod === 'bank' && invoiceData.bankDetails.accountNumber && (
+            <div style={{ padding: '8px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '8px' }}>
+              <div style={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '5px', fontSize: '7px', color: '#555' }}>Bank Transfer</div>
+              {invoiceData.bankDetails.bankName && <div><strong>Bank:</strong> {invoiceData.bankDetails.bankName}</div>}
+              {invoiceData.bankDetails.accountName && <div><strong>Account Name:</strong> {invoiceData.bankDetails.accountName}</div>}
+              {invoiceData.bankDetails.accountNumber && <div><strong>Account No:</strong> {invoiceData.bankDetails.accountNumber}</div>}
+              {invoiceData.bankDetails.ifsc && <div><strong>IFSC:</strong> {invoiceData.bankDetails.ifsc}</div>}
+            </div>
+          )}
+          {payMethod === 'upi' && (
+            <div style={{ padding: '8px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '40px', height: '40px', background: 'repeating-conic-gradient(#333 0% 25%, #eee 0% 50%) 0 0 / 6px 6px', borderRadius: '3px', border: '2px solid #000', flexShrink: 0 }} />
+              <div>
+                <div style={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '7px', color: '#555', marginBottom: '2px' }}>UPI ID</div>
+                <div style={{ fontWeight: 700 }}>{invoiceData.bankDetails.upiId || 'yourname@upi'}</div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Totals right */}
+        <div style={{ width: '160px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '9px', color: '#555', borderBottom: '1px solid #eee' }}>
+            <span>Subtotal</span><span>INR {fmtMoney(subtotal)}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 8px', fontSize: '9px', color: '#444', borderTop: '1px solid #e8eef5' }}>
-            <span>Tax (18%)</span><span>₹{fmtMoney(tax)}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 8px', fontSize: '10px', fontWeight: 800, color: '#003366', background: '#eef4ff', borderTop: '1px solid #0066cc' }}>
-            <span>TOTAL</span><span>₹{fmtMoney(grandTotal)}</span>
+          {gstPct > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '9px', color: '#555', borderBottom: '1px solid #eee' }}>
+              <span>GST ({gstPct}%)</span><span>INR {fmtMoney(tax)}</span>
+            </div>
+          )}
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: '11px', fontWeight: 900, color: '#000', borderTop: '2px solid #000', marginTop: '2px' }}>
+            <span>TOTAL</span><span>INR {fmtMoney(grandTotal)}</span>
           </div>
         </div>
       </div>
 
-      {/* Payment info */}
-      {invoiceData.bankDetails.accountNumber && (
-        <div style={{ marginBottom: '12px', padding: '8px 10px', background: '#f8faff', border: '1px solid #dde8f5', borderRadius: '4px' }}>
-          <div style={{ fontSize: '8px', fontWeight: 700, color: '#003366', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '5px' }}>Payment Information</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 12px', fontSize: '8px', color: '#444' }}>
-            {invoiceData.bankDetails.bankName && <div><span style={{ fontWeight: 700 }}>Bank: </span>{invoiceData.bankDetails.bankName}</div>}
-            {invoiceData.bankDetails.accountNumber && <div><span style={{ fontWeight: 700 }}>Account: </span>{invoiceData.bankDetails.accountNumber}</div>}
-            {invoiceData.bankDetails.ifsc && <div><span style={{ fontWeight: 700 }}>IFSC: </span>{invoiceData.bankDetails.ifsc}</div>}
-            {invoiceData.bankDetails.branch && <div><span style={{ fontWeight: 700 }}>Branch: </span>{invoiceData.bankDetails.branch}</div>}
-            {invoiceData.billedBy.email && <div><span style={{ fontWeight: 700 }}>Email: </span>{invoiceData.billedBy.email}</div>}
-          </div>
+      {/* ── FOOTER: notes + signature ── */}
+      <div style={{ borderTop: '1px solid #ddd', paddingTop: '10px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+        <div style={{ flex: 1 }}>
+          {ap.notes && (
+            <div style={{ marginBottom: '6px' }}>
+              <div style={{ fontSize: '7px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', marginBottom: '2px' }}>Notes</div>
+              <div style={{ fontSize: '8px', color: '#333', fontWeight: 700, fontStyle: 'italic' }}>{ap.notes}</div>
+            </div>
+          )}
+          {ap.terms && (
+            <div>
+              <div style={{ fontSize: '7px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', marginBottom: '2px' }}>Terms</div>
+              <div style={{ fontSize: '8px', color: '#333', fontWeight: 700, fontStyle: 'italic' }}>{ap.terms}</div>
+            </div>
+          )}
         </div>
-      )}
 
-      {/* Thank you */}
-      <div style={{ textAlign: 'center', paddingTop: '10px', borderTop: '1px solid #e8eef5' }}>
-        <div style={{ fontSize: '16px', fontWeight: 900, color: '#0066cc', letterSpacing: '-0.01em' }}>Thank You!</div>
-        <div style={{ fontSize: '8px', color: '#aaa', marginTop: '3px' }}>Generated by YBEX Invoice Maker</div>
+        {/* Signature box */}
+        <div style={{ width: '120px', textAlign: 'center' }}>
+          <div style={{ border: '1px solid #ddd', borderRadius: '4px', padding: '8px', minHeight: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>
+            {ap.signatureType === 'image' && ap.signatureImage ? (
+              <img src={ap.signatureImage} alt="signature" style={{ maxHeight: '50px', maxWidth: '100px', objectFit: 'contain' }} />
+            ) : ap.signatureType === 'text' && ap.signatureText ? (
+              <div style={{ fontSize: '9px', fontWeight: 700, color: '#000' }}>{ap.signatureText}</div>
+            ) : (
+              <div style={{ fontSize: '7px', color: '#ccc' }}>Signature</div>
+            )}
+          </div>
+          <div style={{ fontSize: '7px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#555' }}>Authorised Person</div>
+          <div style={{ fontSize: '6px', color: '#aaa', marginTop: '2px' }}>This is a computer generated copy, no need to be signed</div>
+        </div>
       </div>
     </div>
   );
@@ -797,10 +1016,18 @@ export default function Invoice() {
     invoiceType:     'Standard',
     currency:        'INR',
     placeOfSupply:   '',
+    gstPercent:      18,
+    paymentMethod:   'skip',
     billedBy: { name:'', address:'', pan:'', gstin:'', email:'', phone:'' },
     billedTo: { name:'', address:'', pan:'', gstin:'', email:'', phone:'' },
     items: [{ id: Date.now(), description:'', quantity:1, rate:0, amount:0 }],
-    bankDetails: { accountName:'', accountNumber:'', bankName:'', ifsc:'', branch:'' },
+    bankDetails: { accountName:'', accountNumber:'', bankName:'', ifsc:'', branch:'', upiId:'' },
+    appearance: {
+      logoType: 'text', logoText: 'YBEX', logoImage: '',
+      signatureType: 'text', signatureText: '', signatureImage: '',
+      notes: 'Thank you for your business!',
+      terms: 'Payment is due within 15 days.',
+    },
   });
 
   const updateInvoiceData = useCallback((section, field, value) => {
@@ -811,10 +1038,10 @@ export default function Invoice() {
   }, []);
 
   const subtotal   = useMemo(() => invoiceData.items.reduce((s, i) => s + Number(i.quantity) * Number(i.rate), 0), [invoiceData.items]);
-  const tax        = useMemo(() => subtotal * 0.18, [subtotal]);
+  const tax        = useMemo(() => subtotal * ((invoiceData.gstPercent ?? 18) / 100), [subtotal, invoiceData.gstPercent]);
   const grandTotal = useMemo(() => subtotal + tax,  [subtotal, tax]);
 
-  const goNext = () => setCurrentStep(s => Math.min(s + 1, 6));
+  const goNext = () => setCurrentStep(s => Math.min(s + 1, 7));
   const goPrev = () => setCurrentStep(s => Math.max(s - 1, 1));
 
   const renderStep = () => {
@@ -822,9 +1049,10 @@ export default function Invoice() {
       case 1: return <Step1 invoiceData={invoiceData} setInvoiceData={setInvoiceData} />;
       case 2: return <Step2 invoiceData={invoiceData} updateInvoiceData={updateInvoiceData} />;
       case 3: return <Step3 invoiceData={invoiceData} setInvoiceData={setInvoiceData} subtotal={subtotal} tax={tax} grandTotal={grandTotal} />;
-      case 4: return <Step4 invoiceData={invoiceData} updateInvoiceData={updateInvoiceData} />;
-      case 5: return <Step5 invoiceData={invoiceData} grandTotal={grandTotal} />;
-      case 6: return <Step6 invoiceData={invoiceData} subtotal={subtotal} tax={tax} grandTotal={grandTotal} previewRef={previewRef} />;
+      case 4: return <Step4 invoiceData={invoiceData} setInvoiceData={setInvoiceData} />;
+      case 5: return <Step5 invoiceData={invoiceData} setInvoiceData={setInvoiceData} updateInvoiceData={updateInvoiceData} />;
+      case 6: return <Step6 invoiceData={invoiceData} grandTotal={grandTotal} />;
+      case 7: return <Step7 invoiceData={invoiceData} subtotal={subtotal} tax={tax} grandTotal={grandTotal} previewRef={previewRef} />;
       default: return null;
     }
   };
@@ -899,10 +1127,10 @@ export default function Invoice() {
           white-space: nowrap;
         }
         .inv-step-pill.active {
-          background: #0066cc;
-          border-color: #0066cc;
+          background: #FF3D10;
+          border-color: #FF3D10;
           color: #fff;
-          box-shadow: 0 0 18px rgba(0,102,204,0.45);
+          box-shadow: 0 0 18px rgba(255,61,16,0.45);
         }
         .inv-step-pill.done {
           background: rgba(0,180,100,0.12);
@@ -980,10 +1208,10 @@ export default function Invoice() {
         }
         .inv-nav-prev:hover { background: rgba(255,255,255,0.1); }
         .inv-nav-next {
-          background: #0066cc;
+          background: #FF3D10;
           color: #fff;
         }
-        .inv-nav-next:hover { background: #0052a3; }
+        .inv-nav-next:hover { background: #e03000; }
         .inv-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
         .inv-step-counter { font-size: 0.75rem; color: rgba(255,255,255,0.3); }
 
@@ -1009,8 +1237,8 @@ export default function Invoice() {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: #0066cc;
-          box-shadow: 0 0 8px #0066cc;
+          background: #FF3D10;
+          box-shadow: 0 0 8px #FF3D10;
           animation: inv-pulse 2s infinite;
         }
         @keyframes inv-pulse {
@@ -1036,8 +1264,8 @@ export default function Invoice() {
           align-items: center;
           gap: 1rem;
           padding: 1.1rem 1.25rem;
-          background: rgba(0,102,204,0.1);
-          border: 1px solid rgba(0,102,204,0.25);
+          background: rgba(255,61,16,0.08);
+          border: 1px solid rgba(255,61,16,0.22);
           border-radius: 12px;
           margin-bottom: 1.25rem;
         }
@@ -1049,12 +1277,12 @@ export default function Invoice() {
           width: 48px;
           height: 48px;
           border-radius: 12px;
-          background: rgba(0,102,204,0.2);
-          border: 1px solid rgba(0,102,204,0.4);
+          background: rgba(255,61,16,0.15);
+          border: 1px solid rgba(255,61,16,0.4);
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #4da6ff;
+          color: #FF3D10;
           flex-shrink: 0;
         }
         .step-icon-large.success {
@@ -1088,7 +1316,7 @@ export default function Invoice() {
           align-items: center;
           gap: 0.5rem;
           margin-bottom: 1.1rem;
-          color: #4da6ff;
+          color: #FF3D10;
         }
         .form-header h4 {
           font-size: 0.72rem;
@@ -1130,7 +1358,7 @@ export default function Invoice() {
         .form-field input:focus,
         .form-field select:focus,
         .form-field textarea:focus {
-          border-color: #0066cc;
+          border-color: #FF3D10;
         }
         .form-field select option { background: #1a1a1a; }
         .date-input-wrapper { position: relative; }
@@ -1157,12 +1385,12 @@ export default function Invoice() {
           grid-template-columns: 1fr 70px 90px 90px 36px;
           gap: 0.5rem;
           padding: 0.45rem 0.65rem;
-          background: rgba(0,102,204,0.15);
+          background: rgba(255,61,16,0.12);
           border-radius: 7px;
           margin-bottom: 0.4rem;
           font-size: 0.62rem;
           font-weight: 700;
-          color: rgba(255,255,255,0.45);
+          color: rgba(255,255,255,0.55);
           letter-spacing: 0.06em;
           text-transform: uppercase;
         }
@@ -1188,10 +1416,10 @@ export default function Invoice() {
         }
         .item-description:focus,
         .item-quantity:focus,
-        .item-rate:focus { border-color: #0066cc; }
+        .item-rate:focus { border-color: #FF3D10; }
         .item-amount {
           font-size: 0.82rem;
-          color: #4da6ff;
+          color: #FF3D10;
           font-weight: 600;
           text-align: right;
         }
@@ -1213,10 +1441,10 @@ export default function Invoice() {
           gap: 6px;
           margin-top: 0.65rem;
           padding: 0.55rem 0.9rem;
-          background: rgba(0,102,204,0.1);
-          border: 1px dashed rgba(0,102,204,0.4);
+          background: rgba(255,61,16,0.08);
+          border: 1px dashed rgba(255,61,16,0.4);
           border-radius: 8px;
-          color: #4da6ff;
+          color: #FF3D10;
           font-size: 0.82rem;
           font-weight: 600;
           cursor: pointer;
@@ -1245,8 +1473,8 @@ export default function Invoice() {
 
         /* Review */
         .review-card {
-          background: rgba(0,102,204,0.08);
-          border: 1px solid rgba(0,102,204,0.2);
+          background: rgba(255,61,16,0.07);
+          border: 1px solid rgba(255,61,16,0.2);
           border-radius: 12px;
           padding: 1.25rem;
         }
@@ -1254,7 +1482,7 @@ export default function Invoice() {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          color: #4da6ff;
+          color: #FF3D10;
           font-weight: 700;
           margin-bottom: 0.9rem;
         }
@@ -1294,8 +1522,8 @@ export default function Invoice() {
           transition: all 0.2s;
           font-family: inherit;
         }
-        .button-primary { background: #0066cc; color: #fff; }
-        .button-primary:hover { background: #0052a3; }
+        .button-primary { background: #FF3D10; color: #fff; }
+        .button-primary:hover { background: #e03000; }
         .button-secondary {
           background: rgba(255,255,255,0.08);
           color: #fff;
@@ -1385,7 +1613,7 @@ export default function Invoice() {
                   <ChevronLeft size={17} /> Previous
                 </button>
                 <span className="inv-step-counter">Step {currentStep} of {steps.length}</span>
-                {currentStep < 6 ? (
+                {currentStep < 7 ? (
                   <button className="inv-nav-btn inv-nav-next" onClick={goNext}>
                     Next Step <ChevronRight size={17} />
                   </button>

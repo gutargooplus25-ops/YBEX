@@ -19,13 +19,18 @@ export default function AdminLogin() {
     try {
       const res = await loginUser(form);
       const { token, user } = res.data;
-      if (user.role !== 'admin') {
-        setError('Access denied. Admin only.');
+      const adminRoles = ['admin', 'super-admin', 'sub-admin'];
+      if (!adminRoles.includes(user.role)) {
+        setError('Access denied. Admin credentials required.');
         setLoading(false);
         return;
       }
       login(token, user);
-      navigate('/admin/enquiries');
+      if (user.role === 'admin') {
+        navigate('/admin/enquiries');
+      } else {
+        navigate('/sub-admin/dashboard');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid credentials');
     } finally {
@@ -158,7 +163,7 @@ export default function AdminLogin() {
             transition={{ delay: 0.4 }}
             style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem', marginBottom: '2rem' }}
           >
-            Owner admin credentials required
+            Admin credentials required
           </motion.p>
 
           <AnimatePresence>

@@ -123,11 +123,61 @@ const getAdminUsers = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
+const createAdmin = async (req, res, next) => {
+  try {
+    const { name, email, password, role, status } = req.body;
+    if (!name?.trim()) return res.status(400).json({ message: 'Name is required' });
+    if (!email?.trim()) return res.status(400).json({ message: 'Email is required' });
+    if (!password || password.length < 6) return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    const validRoles = ['sub-admin', 'super-admin', 'admin'];
+    if (!validRoles.includes(role)) return res.status(400).json({ message: 'Invalid role' });
+
+    const existing = await User.findOne({ email: email.trim().toLowerCase() });
+    if (existing) return res.status(400).json({ message: 'Email already in use' });
+
+    const validStatuses = ['school', 'pitch', 'sales', 'general'];
+    const cleanStatus = Array.isArray(status) ? status.filter(s => validStatuses.includes(s)) : [];
+
+    const user = await User.create({
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      password,
+      role,
+      status: cleanStatus,
+      isVerified: true,
+    });
+
+    const userObj = user.toObject();
+    delete userObj.password;
+    res.status(201).json({ success: true, user: userObj });
+  } catch (e) { next(e); }
+};
+
 const updateUserRole = async (req, res, next) => {
   try {
     const { role } = req.body;
-    if (!['user', 'admin'].includes(role)) return res.status(400).json({ message: 'Invalid role' });
+    if (!['user', 'sub-admin', 'super-admin', 'admin'].includes(role)) return res.status(400).json({ message: 'Invalid role' });
     const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true }).select('-password');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ success: true, user });
+  } catch (e) { next(e); }
+};
+
+const updateUser = async (req, res, next) => {
+  try {
+    const { name, email, role } = req.body;
+    const updates = {};
+    if (name?.trim()) updates.name = name.trim();
+    if (email?.trim()) updates.email = email.trim().toLowerCase();
+    if (role && ['user', 'sub-admin', 'super-admin', 'admin'].includes(role)) updates.role = role;
+    
+    // Check if email already exists (if changing email)
+    if (updates.email) {
+      const existing = await User.findOne({ email: updates.email, _id: { $ne: req.params.id } });
+      if (existing) return res.status(400).json({ message: 'Email already in use' });
+    }
+    
+    const user = await User.findByIdAndUpdate(req.params.id, updates, { new: true }).select('-password');
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.json({ success: true, user });
   } catch (e) { next(e); }
@@ -207,7 +257,7 @@ const deleteTeamMember = async (req, res, next) => {
 module.exports = {
   getDashboardStats,
   getAdminContacts, updateContactStatus, approveContact, rejectContact, replyContact, deleteContact,
-  getAdminUsers, updateUserRole, deleteAdminUser,
+  getAdminUsers, createAdmin, updateUserRole, updateUser, deleteAdminUser,
   getAdminSuggestions, updateAdminSuggestion, deleteAdminSuggestion,
   getTeamMembers, addTeamMember, deleteTeamMember,
 };

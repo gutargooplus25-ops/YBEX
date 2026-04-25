@@ -17,7 +17,8 @@ export default function AdminRoute({ children }) {
     );
   }
 
-  if (!user || user.role !== 'admin') {
+  const adminRoles = ['admin', 'super-admin', 'sub-admin'];
+  if (!user || !adminRoles.includes(user.role)) {
     return <Navigate to="/admin/login" replace />;
   }
 

@@ -17,6 +17,7 @@ import AdminAboutTeam from '../pages/Admin/AdminAboutTeam';
 import AdminInfluencers from '../pages/Admin/AdminInfluencers';
 import AdminBrands from '../pages/Admin/AdminBrands';
 import AdminRoute from '../components/common/AdminRoute';
+import SubAdminDashboard from '../pages/Admin/SubAdminDashboard';
 
 const AppRoutes = () => {
   return (
@@ -31,6 +32,7 @@ const AppRoutes = () => {
       <Route path="/get-started" element={<GetStarted />} />
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin" element={<Navigate to="/admin/enquiries" replace />} />
+      <Route path="/sub-admin/dashboard" element={<AdminRoute><SubAdminDashboard /></AdminRoute>} />
       <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
       <Route path="/admin/enquiries" element={<AdminRoute><AdminEnquiries /></AdminRoute>} />
       <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />

@@ -23,6 +23,7 @@ import AdminInfluencers from './pages/Admin/AdminInfluencers';
 import AdminBrands from './pages/Admin/AdminBrands';
 import AdminPlaceholder from './pages/Admin/AdminPlaceholder';
 import AdminInvoices from './pages/Admin/AdminInvoices';
+import SubAdminDashboard from './pages/Admin/SubAdminDashboard';
 
 // Wraps public pages with Navbar + Footer
 function PublicLayout() {
@@ -52,6 +53,7 @@ export default function App() {
       {/* ── Admin routes (NO Navbar/Footer) ── */}
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin" element={<Navigate to="/admin/enquiries" replace />} />
+      <Route path="/sub-admin/dashboard" element={<AdminRoute><SubAdminDashboard /></AdminRoute>} />
       <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
       <Route path="/admin/enquiries" element={<AdminRoute><AdminEnquiries /></AdminRoute>} />
       <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />

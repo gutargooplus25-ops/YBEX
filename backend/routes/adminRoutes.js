@@ -2,11 +2,11 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { protect, adminOnly } = require('../middleware/auth');
+const { protect, adminOnly, ownerAdminOnly } = require('../middleware/auth');
 const {
   getDashboardStats,
   getAdminContacts, updateContactStatus, approveContact, rejectContact, replyContact, deleteContact,
-  getAdminUsers, updateUserRole, deleteAdminUser,
+  getAdminUsers, createAdmin, updateUserRole, updateUser, deleteAdminUser,
   getAdminSuggestions, updateAdminSuggestion, deleteAdminSuggestion,
   getTeamMembers, addTeamMember, deleteTeamMember,
 } = require('../controllers/adminController');
@@ -41,8 +41,10 @@ router.delete('/contacts/:id',        deleteContact);
 
 // ── Users ─────────────────────────────────────────────────────────
 router.get('/users',              getAdminUsers);
+router.post('/users',             protect, ownerAdminOnly, createAdmin);
+router.patch('/users/:id',        updateUser);
 router.patch('/users/:id/role',   updateUserRole);
-router.delete('/users/:id',       deleteAdminUser);
+router.delete('/users/:id',       protect, ownerAdminOnly, deleteAdminUser);
 
 // ── Suggestions ───────────────────────────────────────────────────
 router.get('/suggestions',          getAdminSuggestions);
