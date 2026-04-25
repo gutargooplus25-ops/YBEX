@@ -260,35 +260,117 @@ export default function SubAdminDashboard() {
         </div>
       </motion.header>
 
-      {/* ── TAB BAR ── */}
-      <motion.div
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}
-        style={{ background: '#0a0a0a', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', padding: '0 1.5rem', position: 'sticky', top: '64px', zIndex: 90 }}
-      >
-        {[
-          { key: 'enquiries', label: 'Enquiries' },
-          { key: 'hiring',    label: 'Hiring'    },
-        ].map(tab => {
-          const isActive = activeTab === tab.key;
-          return (
-            <motion.button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              style={{ padding: '0 1.1rem', height: '44px', fontSize: '0.72rem', fontWeight: isActive ? 700 : 500, letterSpacing: '0.08em', textTransform: 'uppercase', background: isActive ? `${accentColor}18` : 'transparent', color: isActive ? '#fff' : 'rgba(255,255,255,0.45)', border: 'none', borderBottom: isActive ? `2px solid ${accentColor}` : '2px solid transparent', borderTop: '2px solid transparent', cursor: 'pointer', position: 'relative', transition: 'all 0.2s', whiteSpace: 'nowrap' }}
-            >
-              {tab.label}
-              {isActive && (
-                <motion.div layoutId="sub-tab-indicator"
-                  style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '2px', background: accentColor }}
-                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                />
-              )}
-            </motion.button>
-          );
-        })}
-      </motion.div>
+      {/* ── SIDEBAR NAVIGATION ── */}
+      <div style={{ display: 'flex', minHeight: 'calc(100vh - 64px)' }}>
+        {/* Sidebar */}
+        <motion.aside
+          initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}
+          style={{ width: '260px', background: 'linear-gradient(180deg, #0a0a0f 0%, #12121a 100%)', borderRight: '1px solid rgba(255,255,255,0.06)', padding: '2rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', position: 'fixed', top: '64px', left: 0, bottom: 0, zIndex: 90, overflowY: 'auto' }}
+        >
+          <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', padding: '0 0.75rem 0.75rem', marginBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            Dashboard Menu
+          </div>
 
-      {/* ── MAIN CONTENT ── */}
-      <main style={{ padding: 'clamp(1rem, 2vw, 1.5rem)', maxWidth: '1200px', margin: '0 auto' }}>
-        <AnimatePresence mode="wait">
+          {/* Enquiries Tab */}
+          <motion.button
+            onClick={() => setActiveTab('enquiries')}
+            whileHover={{ x: 4 }}
+            whileTap={{ scale: 0.98 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '14px 16px',
+              borderRadius: '12px',
+              background: activeTab === 'enquiries' ? 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(124,58,237,0.1))' : 'transparent',
+              border: activeTab === 'enquiries' ? '1px solid rgba(168,85,247,0.3)' : '1px solid transparent',
+              color: activeTab === 'enquiries' ? '#fff' : 'rgba(255,255,255,0.6)',
+              fontSize: '0.9rem',
+              fontWeight: activeTab === 'enquiries' ? 700 : 500,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              textAlign: 'left',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+          >
+            <span style={{ fontSize: '1.3rem' }}>📋</span>
+            <span>Enquiries</span>
+            {activeTab === 'enquiries' && (
+              <motion.div
+                layoutId="sidebar-indicator"
+                style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: '3px', height: '24px', background: '#a855f7', borderRadius: '0 3px 3px 0' }}
+                transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+              />
+            )}
+          </motion.button>
+
+          {/* Hiring Tab - Bigger & More Prominent */}
+          <motion.button
+            onClick={() => setActiveTab('hiring')}
+            whileHover={{ x: 4, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '18px 16px',
+              borderRadius: '14px',
+              background: activeTab === 'hiring'
+                ? 'linear-gradient(135deg, rgba(228,241,65,0.15), rgba(168,85,247,0.1))'
+                : 'linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))',
+              border: activeTab === 'hiring'
+                ? '2px solid rgba(228,241,65,0.5)'
+                : '1px solid rgba(255,255,255,0.08)',
+              color: activeTab === 'hiring' ? '#E4F141' : 'rgba(255,255,255,0.7)',
+              fontSize: '1rem',
+              fontWeight: activeTab === 'hiring' ? 800 : 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              textAlign: 'left',
+              position: 'relative',
+              overflow: 'hidden',
+              boxShadow: activeTab === 'hiring'
+                ? '0 4px 20px rgba(228,241,65,0.15), inset 0 1px 0 rgba(255,255,255,0.1)'
+                : 'inset 0 1px 0 rgba(255,255,255,0.05)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}
+          >
+            <span style={{ fontSize: '1.5rem', filter: activeTab === 'hiring' ? 'drop-shadow(0 0 8px rgba(228,241,65,0.5))' : 'none' }}>💼</span>
+            <span style={{ textShadow: activeTab === 'hiring' ? '0 0 20px rgba(228,241,65,0.3)' : 'none' }}>Hiring</span>
+            {applications.filter(a => a.status === 'pending').length > 0 && (
+              <span style={{
+                marginLeft: 'auto',
+                background: 'linear-gradient(135deg, #FF3D10, #ff6b35)',
+                color: '#fff',
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                padding: '2px 8px',
+                borderRadius: '10px',
+                boxShadow: '0 2px 8px rgba(255,61,16,0.4)'
+              }}>
+                {applications.filter(a => a.status === 'pending').length}
+              </span>
+            )}
+            {activeTab === 'hiring' && (
+              <motion.div
+                layoutId="sidebar-indicator-hiring"
+                style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: '4px', height: '32px', background: '#E4F141', borderRadius: '0 4px 4px 0', boxShadow: '0 0 10px rgba(228,241,65,0.5)' }}
+                transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+              />
+            )}
+          </motion.button>
+
+          {/* Decorative gradient at bottom */}
+          <div style={{ marginTop: 'auto', padding: '1rem', textAlign: 'center' }}>
+            <div style={{ width: '60px', height: '3px', background: 'linear-gradient(90deg, #a855f7, #E4F141)', borderRadius: '2px', margin: '0 auto' }} />
+          </div>
+        </motion.aside>
+
+        {/* Main Content Area */}
+        <main style={{ marginLeft: '260px', flex: 1, padding: 'clamp(1rem, 2vw, 1.5rem)', maxWidth: 'calc(100% - 260px)' }}>
+          <AnimatePresence mode="wait">
 
           {/* ENQUIRIES TAB */}
           {activeTab === 'enquiries' && (
@@ -394,8 +476,9 @@ export default function SubAdminDashboard() {
             </motion.div>
           )}
 
-        </AnimatePresence>
-      </main>
+          </AnimatePresence>
+        </main>
+      </div>
     </div>
   );
 }

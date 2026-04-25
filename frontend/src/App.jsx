@@ -23,6 +23,7 @@ import AdminInfluencers from './pages/Admin/AdminInfluencers';
 import AdminBrands from './pages/Admin/AdminBrands';
 import AdminPlaceholder from './pages/Admin/AdminPlaceholder';
 import AdminInvoices from './pages/Admin/AdminInvoices';
+import AdminSuccessStories from './pages/Admin/AdminSuccessStories';
 import SubAdminDashboard from './pages/Admin/SubAdminDashboard';
 
 // Wraps public pages with Navbar + Footer
@@ -40,13 +41,13 @@ export default function App() {
       {/* ── Public routes (with Navbar + Footer) ── */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
+        <Route path="/offerings" element={<Offerings />} />
         <Route path="/services" element={<Services />} />
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/academy" element={<Academy />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/get-started" element={<GetStarted />} />
-        <Route path="/offerings" element={<Offerings />} />
         <Route path="/invoice" element={<Invoice />} />
       </Route>
 
@@ -62,7 +63,7 @@ export default function App() {
       <Route path="/admin/influencers" element={<AdminRoute><AdminInfluencers /></AdminRoute>} />
       <Route path="/admin/brands" element={<AdminRoute><AdminBrands /></AdminRoute>} />
       <Route path="/admin/school-mentors" element={<AdminRoute><AdminPlaceholder title="School Mentors" icon="🎓" description="Manage school mentor profiles and assignments." /></AdminRoute>} />
-      <Route path="/admin/success-stories" element={<AdminRoute><AdminPlaceholder title="Success Stories" icon="🏆" description="Manage and publish success stories." /></AdminRoute>} />
+      <Route path="/admin/success-stories" element={<AdminRoute><AdminSuccessStories /></AdminRoute>} />
       <Route path="/admin/scholarship" element={<AdminRoute><AdminPlaceholder title="Scholarship" icon="🎖️" description="Manage scholarship applications and awards." /></AdminRoute>} />
       <Route path="/admin/activity-logs" element={<AdminRoute><AdminPlaceholder title="Activity Logs" icon="📊" description="View all admin and user activity logs." /></AdminRoute>} />
       <Route path="/admin/invoices" element={<AdminRoute><AdminInvoices /></AdminRoute>} />

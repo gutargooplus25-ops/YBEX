@@ -12,6 +12,7 @@ const suggestionRoutes = require('./routes/suggestionRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const invoiceRoutes = require('./routes/invoiceRoutes');
+const successStoryRoutes = require('./routes/successStoryRoutes');
 
 dotenv.config();
 connectDB();
@@ -33,6 +34,7 @@ app.use('/api/suggestions', suggestionRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/invoices', invoiceRoutes);
+app.use('/api/success-stories', successStoryRoutes);
 
 // Public brands endpoint (no auth required)
 const Brand = require('./models/Brand');
