@@ -1,8 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import axios from 'axios';
+import AdminLayout from './AdminLayout';
 
 const API_URL = 'http://localhost:5000/api';
+const ACCENT = '#e4f141';
+const BORDER = 'rgba(255,255,255,0.06)';
+const MUTED  = 'rgba(255,255,255,0.55)';
+const DIM    = 'rgba(255,255,255,0.1)';
 
 export default function AdminSuccessStories() {
   const [stories, setStories] = useState([]);
@@ -18,6 +23,7 @@ export default function AdminSuccessStories() {
     quote: '',
     earning: '',
     company: '',
+    socialLink: '',
     initials: '',
     isActive: true
   });
@@ -48,7 +54,8 @@ export default function AdminSuccessStories() {
         quote: story.quote,
         earning: story.earning,
         company: story.company,
-        initials: story.initials,
+        socialLink: story.socialLink || '',
+        initials: story.initials || getInitials(story.name),
         isActive: story.isActive
       });
       setPreviewImage(story.imageUrl);
@@ -60,6 +67,7 @@ export default function AdminSuccessStories() {
         quote: '',
         earning: '',
         company: '',
+        socialLink: '',
         initials: '',
         isActive: true
       });
@@ -83,14 +91,49 @@ export default function AdminSuccessStories() {
     }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+  // Compress image before setting preview
+  const compressImage = (file, maxWidth = 800, quality = 0.8) => {
+    return new Promise((resolve) => {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result);
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#000';
+          ctx.fillRect(0, 0, width, height);
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressedDataUrl);
+        };
+        img.src = e.target.result;
       };
       reader.readAsDataURL(file);
+    });
+  };
+
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        // Compress image to avoid 413 Payload Too Large error
+        const compressedImage = await compressImage(file, 800, 0.8);
+        setPreviewImage(compressedImage);
+      } catch (err) {
+        console.error('Error compressing image:', err);
+        alert('Error processing image. Please try a smaller image.');
+      }
     }
   };
 
@@ -131,66 +174,133 @@ export default function AdminSuccessStories() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0a0f', color: '#fff', padding: '2rem' }}>
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        style={{ marginBottom: '2rem' }}
+    <AdminLayout>
+      {/* Header Section */}
+      <motion.div initial={{ opacity: 0, y: -14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
+        style={{ marginBottom: '2rem', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}
       >
-        <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-          SUCCESS STORIES
-        </h1>
-        <p style={{ color: 'rgba(255,255,255,0.5)' }}>Manage student success stories for the Academy page</p>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
+            <motion.div 
+              animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ 
+                width: '44px', 
+                height: '44px', 
+                borderRadius: '14px', 
+                background: 'linear-gradient(135deg, rgba(228,241,65,0.15) 0%, rgba(228,241,65,0.05) 100%)',
+                border: '1px solid rgba(228,241,65,0.25)',
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                fontSize: '1.4rem',
+                boxShadow: '0 8px 32px rgba(228,241,65,0.15)',
+              }}
+            >🏆</motion.div>
+            <h1 style={{ 
+              fontSize: '1.6rem', 
+              fontWeight: 800, 
+              color: '#fff', 
+              letterSpacing: '-0.03em', 
+              margin: 0,
+              fontFamily: "'Space Grotesk', sans-serif",
+            }}>Success Stories</h1>
+          </div>
+          <p style={{ color: MUTED, fontSize: '0.85rem', margin: 0, paddingLeft: '56px' }}>{stories.length} stor{stories.length !== 1 ? 'ies' : 'y'} · shown on Academy page</p>
+        </div>
+        <motion.button 
+          whileHover={{ scale: 1.03, boxShadow: '0 12px 35px rgba(228,241,65,0.35)' }} 
+          whileTap={{ scale: 0.97 }}
+          onClick={() => handleOpenModal()}
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '10px', 
+            padding: '0.85rem 1.6rem', 
+            background: 'linear-gradient(135deg, #e4f141 0%, #d4e130 100%)', 
+            border: 'none', 
+            borderRadius: '14px', 
+            color: '#000', 
+            fontSize: '0.9rem', 
+            fontWeight: 700, 
+            cursor: 'pointer',
+            boxShadow: '0 4px 20px rgba(228,241,65,0.2)',
+          }}
+        >+ Add Success Story</motion.button>
       </motion.div>
 
-      {/* Add Story Button */}
-      <motion.button
-        onClick={() => handleOpenModal()}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        style={{
-          padding: '12px 24px',
-          borderRadius: '12px',
-          background: 'linear-gradient(135deg, #ff4d00, #ff6b35)',
-          color: '#fff',
-          fontWeight: 700,
-          border: 'none',
-          cursor: 'pointer',
-          marginBottom: '2rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}
+      {/* Info Tip */}
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}
+        style={{ background: 'rgba(228,241,65,0.04)', border: '1px solid rgba(228,241,65,0.13)', borderRadius: '14px', padding: '0.9rem 1.2rem', marginBottom: '1.8rem', fontSize: '0.78rem', color: 'rgba(255,255,255,0.48)' }}
       >
-        <span>+</span> ADD SUCCESS STORY
-      </motion.button>
+        💡 Add inspiring student success stories to showcase on the Academy page. Include a photo, role, earnings, and testimonial quote.
+      </motion.div>
 
-      {/* Stories Grid */}
+      {/* Stories Grid - Scrollable Section */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '4rem', color: 'rgba(255,255,255,0.5)' }}>
-          Loading...
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: '1.25rem' }}>
+          {[...Array(6)].map((_, i) => (
+            <motion.div key={i} animate={{ opacity: [0.15, 0.4, 0.15] }} transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.15 }}
+              style={{ height: '320px', borderRadius: '24px', background: 'linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)', border: '1px solid ' + BORDER }} />
+          ))}
         </div>
       ) : stories.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '4rem', color: 'rgba(255,255,255,0.5)' }}>
-          No success stories yet. Add your first story!
-        </div>
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
+          style={{ 
+            background: 'linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)', 
+            border: '1px solid ' + BORDER, 
+            borderRadius: '24px', 
+            padding: '5rem 2rem', 
+            textAlign: 'center',
+          }}
+        >
+          <motion.div 
+            animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+            transition={{ duration: 3, repeat: Infinity }}
+            style={{ fontSize: '3.5rem', marginBottom: '1.5rem', filter: 'drop-shadow(0 0 30px rgba(228,241,65,0.3))' }}
+          >🏆</motion.div>
+          <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1.1rem', fontWeight: 600, marginBottom: '8px' }}>No success stories yet</div>
+          <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.9rem' }}>Click "Add Success Story" to add your first student testimonial.</div>
+        </motion.div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: '1.25rem' }}
+        >
+          <AnimatePresence>
           {stories.map((story, index) => (
             <motion.div
               key={story._id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
+              whileHover={{ y: -8, transition: { duration: 0.3 } }}
               style={{
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
-                borderRadius: '16px',
+                background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
+                borderRadius: '20px',
                 padding: '1.5rem',
-                border: `1px solid ${story.isActive ? 'rgba(255,77,0,0.3)' : 'rgba(255,255,255,0.1)'}`,
-                position: 'relative'
+                border: `1px solid ${story.isActive ? 'rgba(228,241,65,0.25)' : 'rgba(255,255,255,0.08)'}`,
+                position: 'relative',
+                overflow: 'hidden',
+                cursor: 'pointer'
               }}
             >
+              {/* Animated gradient border on hover */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileHover={{ opacity: 1 }}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: '20px',
+                  padding: '1px',
+                  background: 'linear-gradient(135deg, rgba(228,241,65,0.4) 0%, rgba(255,77,0,0.2) 50%, rgba(228,241,65,0.4) 100%)',
+                  WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                  WebkitMaskComposite: 'xor',
+                  maskComposite: 'exclude',
+                  pointerEvents: 'none',
+                  opacity: 0
+                }}
+              />
               {/* Status Badge */}
               <div style={{
                 position: 'absolute',
@@ -206,104 +316,208 @@ export default function AdminSuccessStories() {
                 {story.isActive ? 'ACTIVE' : 'INACTIVE'}
               </div>
 
-              {/* Avatar */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1rem' }}>
-                {story.imageUrl ? (
-                  <img
-                    src={story.imageUrl}
-                    alt={story.name}
-                    style={{
-                      width: '60px',
-                      height: '60px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      border: '2px solid rgba(255,77,0,0.3)'
-                    }}
-                  />
-                ) : (
-                  <div style={{
-                    width: '60px',
-                    height: '60px',
+              {/* Avatar with B&W to Color Hover Effect */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '1.2rem' }}>
+                <motion.div
+                  whileHover={{ scale: 1.08 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    position: 'relative',
+                    width: '70px',
+                    height: '70px',
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #ff4d00, #ff6b35)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.5rem',
-                    fontWeight: 700
-                  }}>
-                    {story.initials || getInitials(story.name)}
-                  </div>
-                )}
-                <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>{story.name}</h3>
-                  <p style={{ fontSize: '0.8rem', color: '#ff6b35', margin: 0 }}>{story.role}</p>
+                    overflow: 'hidden',
+                    border: '2px solid rgba(228,241,65,0.2)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+                  }}
+                >
+                  {story.imageUrl ? (
+                    <>
+                      <img
+                        src={story.imageUrl}
+                        alt={story.name}
+                        className="story-avatar-img"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          filter: 'grayscale(100%) contrast(1.1)',
+                          transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                        }}
+                      />
+                      {/* Glow overlay on hover */}
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        whileHover={{ opacity: 1 }}
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          background: 'radial-gradient(circle, rgba(228,241,65,0.3) 0%, transparent 70%)',
+                          pointerEvents: 'none',
+                          transition: 'opacity 0.4s ease'
+                        }}
+                      />
+                    </>
+                  ) : (
+                    <div style={{
+                      width: '100%',
+                      height: '100%',
+                      background: 'linear-gradient(135deg, #ff4d00, #ff6b35)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.5rem',
+                      fontWeight: 700
+                    }}>
+                      {story.initials || getInitials(story.name)}
+                    </div>
+                  )}
+                </motion.div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ 
+                    fontSize: '1.15rem', 
+                    fontWeight: 700, 
+                    margin: 0,
+                    background: 'linear-gradient(90deg, #fff 0%, rgba(255,255,255,0.8) 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}>{story.name}</h3>
+                  <p style={{ fontSize: '0.8rem', color: ACCENT, margin: '4px 0 0 0', fontWeight: 500 }}>{story.role}</p>
+                  {story.socialLink && (
+                    <motion.a 
+                      href={story.socialLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      whileHover={{ scale: 1.05, x: 3 }}
+                      style={{ 
+                        fontSize: '0.7rem', 
+                        color: 'rgba(255,255,255,0.4)', 
+                        textDecoration: 'none',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        marginTop: '4px'
+                      }}
+                    >
+                      🔗 Social Profile
+                    </motion.a>
+                  )}
                 </div>
               </div>
 
-              {/* Quote */}
-              <p style={{
-                fontSize: '0.9rem',
-                color: 'rgba(255,255,255,0.7)',
-                lineHeight: 1.5,
-                marginBottom: '1rem',
-                fontStyle: 'italic'
-              }}>
-                "{story.quote.substring(0, 100)}{story.quote.length > 100 ? '...' : ''}"
-              </p>
+              {/* Quote with shimmer */}
+              <div style={{ position: 'relative', marginBottom: '1rem' }}>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 0.03, scale: 1 }}
+                  transition={{ duration: 2, repeat: Infinity, repeatType: 'reverse' }}
+                  style={{
+                    position: 'absolute',
+                    top: -10,
+                    left: -5,
+                    fontSize: '4rem',
+                    color: ACCENT,
+                    fontFamily: 'serif',
+                    pointerEvents: 'none'
+                  }}
+                >"</motion.div>
+                <p style={{
+                  fontSize: '0.9rem',
+                  color: 'rgba(255,255,255,0.75)',
+                  lineHeight: 1.6,
+                  fontStyle: 'italic',
+                  paddingLeft: '8px',
+                  borderLeft: '2px solid rgba(228,241,65,0.3)'
+                }}>
+                  {story.quote.substring(0, 100)}{story.quote.length > 100 ? '...' : ''}
+                </p>
+              </div>
 
-              {/* Stats */}
+              {/* Stats with glow effect */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
+                alignItems: 'center',
                 paddingTop: '1rem',
-                borderTop: '1px solid rgba(255,255,255,0.1)'
+                borderTop: '1px solid rgba(255,255,255,0.06)'
               }}>
-                <span style={{ fontWeight: 700 }}>{story.earning}</span>
-                <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>{story.company}</span>
+                <motion.span 
+                  whileHover={{ scale: 1.05 }}
+                  style={{ 
+                    fontWeight: 800, 
+                    fontSize: '1rem',
+                    background: 'linear-gradient(135deg, #e4f141 0%, #d4e130 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    textShadow: '0 0 30px rgba(228,241,65,0.3)'
+                  }}
+                >
+                  {story.earning}
+                </motion.span>
+                <span style={{ 
+                  color: 'rgba(255,255,255,0.4)', 
+                  fontSize: '0.75rem',
+                  fontWeight: 500,
+                  letterSpacing: '0.05em'
+                }}>{story.company}</span>
               </div>
 
               {/* Actions */}
-              <div style={{ display: 'flex', gap: '8px', marginTop: '1rem' }}>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '1.2rem' }}>
                 <motion.button
-                  onClick={() => handleOpenModal(story)}
-                  whileHover={{ scale: 1.05 }}
+                  onClick={(e) => { e.stopPropagation(); handleOpenModal(story); }}
+                  whileHover={{ scale: 1.05, background: 'rgba(228,241,65,0.15)' }}
                   whileTap={{ scale: 0.95 }}
                   style={{
                     flex: 1,
-                    padding: '8px',
-                    borderRadius: '8px',
-                    background: 'rgba(255,255,255,0.1)',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    color: '#fff',
+                    padding: '10px',
+                    borderRadius: '10px',
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(228,241,65,0.2)',
+                    color: ACCENT,
                     cursor: 'pointer',
-                    fontSize: '0.8rem'
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    transition: 'all 0.2s ease'
                   }}
                 >
-                  Edit
+                  ✏️ Edit
                 </motion.button>
                 <motion.button
-                  onClick={() => handleDelete(story._id)}
-                  whileHover={{ scale: 1.05, background: 'rgba(255,61,16,0.3)' }}
+                  onClick={(e) => { e.stopPropagation(); handleDelete(story._id); }}
+                  whileHover={{ scale: 1.05, background: 'rgba(255,61,16,0.2)' }}
                   whileTap={{ scale: 0.95 }}
                   style={{
                     flex: 1,
-                    padding: '8px',
-                    borderRadius: '8px',
-                    background: 'rgba(255,61,16,0.1)',
-                    border: '1px solid rgba(255,61,16,0.3)',
+                    padding: '10px',
+                    borderRadius: '10px',
+                    background: 'rgba(255,61,16,0.08)',
+                    border: '1px solid rgba(255,61,16,0.25)',
                     color: '#FF3D10',
                     cursor: 'pointer',
-                    fontSize: '0.8rem'
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    transition: 'all 0.2s ease'
                   }}
                 >
-                  Delete
+                  🗑️ Delete
                 </motion.button>
               </div>
             </motion.div>
           ))}
-        </div>
+          </AnimatePresence>
+        </motion.div>
       )}
+      
+      {/* CSS for B&W to Color Hover Effect */}
+      <style>{`
+        .story-avatar-img:hover {
+          filter: grayscale(0%) contrast(1) !important;
+          transform: scale(1.1);
+        }
+      `}</style>
 
       {/* Modal */}
       <AnimatePresence>
@@ -593,6 +807,41 @@ export default function AdminSuccessStories() {
                   </div>
                 </div>
 
+                {/* Social Link Field */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: 'rgba(255,255,255,0.5)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    marginBottom: '8px'
+                  }}>
+                    🔗 Social Media Link
+                  </label>
+                  <input
+                    type="url"
+                    name="socialLink"
+                    value={formData.socialLink}
+                    onChange={handleInputChange}
+                    placeholder="e.g. https://instagram.com/username or https://linkedin.com/in/username"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      borderRadius: '10px',
+                      background: 'rgba(0,0,0,0.3)',
+                      border: '1px solid rgba(228,241,65,0.2)',
+                      color: '#fff',
+                      fontSize: '0.9rem',
+                      outline: 'none'
+                    }}
+                  />
+                  <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>
+                    Optional: Link to student's Instagram, LinkedIn, or other social profile
+                  </p>
+                </div>
+
                 <div style={{ marginBottom: '1rem' }}>
                   <label style={{
                     display: 'block',
@@ -693,6 +942,6 @@ export default function AdminSuccessStories() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </AdminLayout>
   );
 }

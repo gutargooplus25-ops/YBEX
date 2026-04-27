@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import axios from 'axios';
+import axiosInstance from '../../api/axiosInstance';
 
 /* ─── DATA ─────────────────────────────────────────────────────────── */
 const pillars = [
@@ -102,6 +102,164 @@ const staticSuccessStories = [
 const fadeUp = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0 } };
 const stagger = { show: { transition: { staggerChildren: 0.1 } } };
 
+/* ─── AUTO-SCROLL QUOTE COMPONENT ──────────────────────────────────── */
+function StoryQuote({ lines }) {
+  const containerRef = useRef(null);
+  const intervalRef = useRef(null);
+  const currentLineRef = useRef(0);
+  const isPausedRef = useRef(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [activeLineIndex, setActiveLineIndex] = useState(0);
+  const isLong = lines.length > 5;
+
+  useEffect(() => {
+    if (!isLong) return;
+    const el = containerRef.current;
+    if (!el) return;
+
+    const lineEls = el.querySelectorAll('.q-line');
+    const lineHeight = lineEls[0] ? lineEls[0].offsetHeight + 2 : 22;
+
+    const tick = () => {
+      if (isPausedRef.current) return;
+      currentLineRef.current = (currentLineRef.current + 1) % lines.length;
+      const idx = currentLineRef.current;
+      setActiveLineIndex(idx);
+      el.scrollTo({ top: idx * lineHeight, behavior: 'smooth' });
+    };
+
+    // Reset on mount
+    currentLineRef.current = 0;
+    setActiveLineIndex(0);
+    el.scrollTop = 0;
+
+    intervalRef.current = setInterval(tick, 2400);
+    return () => clearInterval(intervalRef.current);
+  }, [isLong, lines.length]);
+
+  const handleClick = () => {
+    isPausedRef.current = !isPausedRef.current;
+    setIsPaused(isPausedRef.current);
+  };
+
+  const progress = isLong ? Math.round(((activeLineIndex + 1) / lines.length) * 100) : 100;
+
+  return (
+    <div style={{ position: 'relative', flex: 1 }}>
+      {/* Progress bar */}
+      {isLong && (
+        <div style={{
+          height: '2px',
+          background: 'rgba(139,92,246,0.15)',
+          borderRadius: '2px',
+          marginBottom: '10px',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            height: '100%',
+            width: `${progress}%`,
+            background: 'linear-gradient(90deg, #7c3aed, #a78bfa)',
+            borderRadius: '2px',
+            transition: 'width 0.4s ease',
+            boxShadow: '0 0 8px rgba(124,58,237,0.7)'
+          }} />
+        </div>
+      )}
+
+      {/* Scrollable quote area */}
+      <div
+        ref={containerRef}
+        onClick={isLong ? handleClick : undefined}
+        style={{
+          maxHeight: '120px',
+          overflowY: isLong ? 'hidden' : 'visible',
+          overflowX: 'hidden',
+          position: 'relative',
+          cursor: isLong ? 'pointer' : 'default',
+          scrollBehavior: 'smooth',
+          WebkitMaskImage: isLong ? 'linear-gradient(to bottom, black 70%, transparent 100%)' : 'none',
+          maskImage: isLong ? 'linear-gradient(to bottom, black 70%, transparent 100%)' : 'none',
+        }}
+      >
+        {lines.map((line, lineIndex) => (
+          <p
+            key={lineIndex}
+            className="q-line"
+            style={{
+              fontSize: '0.82rem',
+              color: isLong
+                ? (lineIndex === activeLineIndex ? 'rgba(255,255,255,0.95)' : lineIndex < activeLineIndex ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.65)')
+                : 'rgba(255,255,255,0.75)',
+              lineHeight: 1.55,
+              margin: '0 0 2px 0',
+              fontStyle: 'italic',
+              fontWeight: isLong && lineIndex === activeLineIndex ? 600 : 400,
+              WebkitFontSmoothing: 'antialiased',
+              transition: 'color 0.4s ease, font-weight 0.3s ease',
+              transform: isLong && lineIndex === activeLineIndex ? 'translateX(3px)' : 'translateX(0)',
+            }}
+          >
+            {lineIndex === 0 && (
+              <span style={{ color: '#a78bfa', fontSize: '1rem', fontStyle: 'normal', marginRight: '2px', lineHeight: 1 }}>"</span>
+            )}
+            {line}
+            {lineIndex === lines.length - 1 && (
+              <span style={{ color: '#a78bfa', fontSize: '1rem', fontStyle: 'normal', marginLeft: '2px', lineHeight: 1 }}>"</span>
+            )}
+          </p>
+        ))}
+      </div>
+
+      {/* Pause / Play hint */}
+      {isLong && (
+        <div style={{
+          marginTop: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '5px',
+          cursor: 'pointer',
+        }} onClick={handleClick}>
+          <div style={{
+            width: '16px',
+            height: '16px',
+            borderRadius: '50%',
+            background: isPaused ? 'rgba(167,139,250,0.2)' : 'rgba(124,58,237,0.25)',
+            border: `1px solid ${isPaused ? 'rgba(167,139,250,0.5)' : 'rgba(124,58,237,0.5)'}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            transition: 'all 0.3s ease'
+          }}>
+            {isPaused ? (
+              /* Play triangle */
+              <svg width="6" height="7" viewBox="0 0 6 7" fill="#a78bfa">
+                <path d="M1 0.5L5.5 3.5L1 6.5V0.5Z"/>
+              </svg>
+            ) : (
+              /* Pause bars */
+              <svg width="6" height="7" viewBox="0 0 6 7" fill="#a78bfa">
+                <rect x="0.5" y="0.5" width="2" height="6" rx="0.5"/>
+                <rect x="3.5" y="0.5" width="2" height="6" rx="0.5"/>
+              </svg>
+            )}
+          </div>
+          <span style={{
+            fontSize: '0.62rem',
+            color: 'rgba(167,139,250,0.6)',
+            fontWeight: 600,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            userSelect: 'none'
+          }}>
+            {isPaused ? 'Resume' : 'Pause'}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── COMPONENT ─────────────────────────────────────────────────────── */
 export default function Academy() {
   const [openFaq, setOpenFaq] = useState(0);
@@ -124,8 +282,8 @@ export default function Academy() {
     const fetchData = async () => {
       try {
         const [brandsRes, storiesRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/brands'),
-          axios.get('http://localhost:5000/api/success-stories')
+          axiosInstance.get('/brands'),
+          axiosInstance.get('/success-stories')
         ]);
         setBrands(brandsRes.data.data || brandsRes.data.brands || []);
         setSuccessStories(storiesRes.data.data || []);
@@ -159,7 +317,7 @@ export default function Academy() {
     setIsSubmitting(true);
 
     try {
-      await axios.post('http://localhost:5000/api/contact', {
+      await axiosInstance.post('/contact', {
         name: formData.fullName,
         email: formData.email,
         phone: formData.phone,
@@ -180,62 +338,114 @@ export default function Academy() {
     }
   };
 
-  const displayBrands = brands.length > 0 ? brands.map(b => b.name) : staticPlacementBrands;
+  const displayBrands = brands.length > 0 ? brands : staticPlacementBrands.map((name, i) => ({ name, logoUrl: null, websiteLink: null, _id: i }));
   const displayStories = successStories.length > 0 ? successStories : staticSuccessStories;
 
   return (
-    <div style={{ background: 'linear-gradient(180deg,#06040f 0%,#080612 40%,#050410 100%)', minHeight: '100vh', color: '#fff', fontFamily: "'Outfit', sans-serif", overflowX: 'hidden' }}>
+    <div style={{ 
+      minHeight: '100vh', 
+      color: '#fff', 
+      fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif", 
+      overflowX: 'hidden',
+      backgroundColor: '#050510',
+      backgroundImage: `
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(30, 60, 150, 0.25), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 50%, rgba(20, 40, 120, 0.15), transparent),
+        radial-gradient(ellipse 50% 30% at 20% 80%, rgba(25, 50, 130, 0.12), transparent)
+      `,
+    }}>
+      {/* Purple Grid Overlay - Full Page */}
+      <div style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        right: 0, 
+        bottom: 0,
+        backgroundImage: `
+          linear-gradient(rgba(139, 92, 246, 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(139, 92, 246, 0.06) 1px, transparent 1px)
+        `,
+        backgroundSize: '50px 50px',
+        pointerEvents: 'none',
+        zIndex: 1
+      }} />
+
+      {/* CSS for hover effects */}
+      <style>{`
+        .story-card:hover .image-hover-overlay {
+          background: rgba(0,0,0,0.38) !important;
+        }
+        .story-card:hover .image-hover-overlay .profile-link-btn {
+          opacity: 1 !important;
+          transform: translateY(0) !important;
+        }
+        .story-card:hover img {
+          transform: scale(1.07) !important;
+        }
+        .story-card:hover {
+          border-color: rgba(139,92,246,0.35) !important;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(139,92,246,0.15), 0 0 40px rgba(124,58,237,0.12) !important;
+        }
+      `}</style>
 
       {/* ── HERO ── */}
-      <section style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '120px 20px 80px', overflow: 'hidden' }}>
-        {/* bg glow */}
-        <div style={{ position: 'absolute', top: '10%', left: '50%', transform: 'translateX(-50%)', width: '700px', height: '400px', background: 'radial-gradient(ellipse,rgba(120,60,255,0.35) 0%,transparent 70%)', filter: 'blur(60px)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '0', left: '50%', transform: 'translateX(-50%)', width: '500px', height: '300px', background: 'radial-gradient(ellipse,rgba(90,40,200,0.2) 0%,transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none' }} />
+      <section style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '120px 20px 80px', overflow: 'hidden', zIndex: 2 }}>
+        {/* Purple Glow Effects */}
+        <div style={{ position: 'absolute', top: '8%', left: '50%', transform: 'translateX(-50%)', width: '700px', height: '400px', background: 'radial-gradient(ellipse,rgba(139,92,246,0.4) 0%,transparent 70%)', filter: 'blur(60px)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '15%', left: '20%', width: '400px', height: '300px', background: 'radial-gradient(ellipse,rgba(124,58,237,0.25) 0%,transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none' }} />
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} style={{ marginBottom: '28px' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 18px', borderRadius: '999px', border: '1px solid rgba(150,100,255,0.35)', background: 'rgba(100,60,200,0.15)', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.85)' }}>
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#a855f7', display: 'inline-block' }} />
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '999px', border: '1px solid rgba(139,92,246,0.4)', background: 'rgba(139,92,246,0.12)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.95)', WebkitFontSmoothing: 'antialiased' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#a78bfa', display: 'inline-block', boxShadow: '0 0 12px #a78bfa' }} />
             LIMITED SEATS AVAILABLE FOR NEXT BATCH
           </span>
         </motion.div>
 
-        <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }} style={{ margin: '0 0 16px', fontSize: 'clamp(3.2rem,8vw,6.5rem)', fontWeight: 800, lineHeight: 1, letterSpacing: '-0.04em', fontFamily: "'Outfit',sans-serif" }}>
-          <span style={{ color: '#fff' }}>YBEX </span>
-          <span style={{ background: 'linear-gradient(135deg,#a855f7,#7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>School</span>
+        <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }} style={{ margin: '0 0 16px', fontSize: 'clamp(2.8rem,7vw,4.5rem)', fontWeight: 800, lineHeight: 1.05, letterSpacing: '-0.02em', fontFamily: "'Inter','Plus Jakarta Sans',sans-serif", WebkitFontSmoothing: 'antialiased' }}>
+          <span style={{ 
+            background: 'linear-gradient(135deg,#ffffff 0%,#a78bfa 50%,#8b5cf6 100%)', 
+            WebkitBackgroundClip: 'text', 
+            WebkitTextFillColor: 'transparent', 
+            backgroundClip: 'text',
+            filter: 'drop-shadow(0 0 40px rgba(139,92,246,0.6))'
+          }}>YBEX SCHOOL</span>
         </motion.h1>
 
-        <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} style={{ margin: '0 0 40px', fontSize: 'clamp(1rem,2vw,1.25rem)', color: 'rgba(255,255,255,0.65)', fontWeight: 400 }}>
+        <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} style={{ margin: '0 0 32px', fontSize: 'clamp(0.9rem,1.8vw,1.1rem)', color: 'rgba(255,255,255,0.85)', fontWeight: 500, letterSpacing: '0.01em', WebkitFontSmoothing: 'antialiased' }}>
           A School from <strong style={{ color: '#fff', fontWeight: 600 }}>Founders Cabin</strong>
         </motion.p>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '80px' }}>
-          {/* Join Now Button with Lightning/Shimmer Effect */}
+          {/* Join Now Button - Blue Theme with White Shine */}
           <motion.button
             onClick={() => handleApplyClick('enrollment')}
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.03, y: -2 }}
+            whileTap={{ scale: 0.97 }}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              padding: '14px 32px',
+              padding: '12px 28px',
               borderRadius: '999px',
-              background: 'linear-gradient(135deg, #ff4d00, #ff6b35)',
+              background: 'linear-gradient(135deg, #7c3aed, #a78bfa)',
               color: '#fff',
-              fontWeight: 700,
-              fontSize: '1rem',
-              border: 'none',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              border: '1px solid rgba(167,139,250,0.4)',
               cursor: 'pointer',
-              boxShadow: '0 8px 32px rgba(255,77,0,0.4), 0 0 0 1px rgba(255,255,255,0.1)',
+              boxShadow: '0 8px 32px rgba(124,58,237,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
               position: 'relative',
               overflow: 'hidden',
-              textDecoration: 'none'
+              textDecoration: 'none',
+              letterSpacing: '0.02em',
+              WebkitFontSmoothing: 'antialiased'
             }}
           >
+            {/* White Shining Effect */}
             <motion.div
-              initial={{ x: '-100%' }}
-              animate={{ x: '200%' }}
-              transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2, ease: 'easeInOut' }}
+              initial={{ x: '-100%', opacity: 0 }}
+              animate={{ x: ['-100%', '200%'], opacity: [0, 0.5, 0] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 2, ease: 'easeInOut' }}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -246,14 +456,33 @@ export default function Academy() {
                 pointerEvents: 'none'
               }}
             />
-            <span style={{ position: 'relative', zIndex: 1 }}>Join Now →</span>
+            <span style={{ position: 'relative', zIndex: 1, textShadow: '0 0 15px rgba(255,255,255,0.5)', fontWeight: 600 }}>Join Now</span>
+            <span style={{ position: 'relative', zIndex: 1 }}>→</span>
           </motion.button>
 
-          <a href="#curriculum" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px 32px', borderRadius: '999px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', fontWeight: 700, fontSize: '1rem', textDecoration: 'none', transition: 'all 0.3s ease' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.14)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
-            Explore Curriculum
-          </a>
+          <motion.a 
+            href="#curriculum" 
+            whileHover={{ scale: 1.03, y: -2 }}
+            whileTap={{ scale: 0.97 }}
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '8px', 
+              padding: '12px 28px', 
+              borderRadius: '999px', 
+              background: 'rgba(255,255,255,0.06)', 
+              border: '1px solid rgba(255,255,255,0.1)', 
+              color: 'rgba(255,255,255,0.9)', 
+              fontWeight: 500, 
+              fontSize: '0.85rem', 
+              textDecoration: 'none',
+              letterSpacing: '0.01em',
+              transition: 'all 0.3s ease',
+              WebkitFontSmoothing: 'antialiased'
+            }}
+          >
+            <span style={{ fontWeight: 500 }}>Explore Curriculum</span>
+          </motion.a>
         </motion.div>
 
         {/* Feature cards row */}
@@ -356,21 +585,39 @@ export default function Academy() {
           </p>
         </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '32px', maxWidth: '1000px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(300px,100%),1fr))', gap: '32px', maxWidth: '1000px', margin: '0 auto' }}>
           <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}
             style={{ padding: '40px', borderRadius: '24px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
             <h3 style={{ fontSize: '1.4rem', fontWeight: 700, margin: '0 0 24px', color: '#fff' }}>What You Get in Premium</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
               {premiumFeatures.map((feature, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
+                  whileHover={{ scale: 1.02, backgroundColor: 'rgba(168,85,247,0.05)' }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    gap: '10px',
+                    padding: '16px 14px',
+                    borderRadius: '14px',
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '1px solid rgba(168,85,247,0.12)',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
                     {feature.iconEmoji}
                   </div>
                   <div>
-                    <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#fff', marginBottom: '4px' }}>{feature.title}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.4 }}>{feature.desc}</div>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#fff', marginBottom: '4px', lineHeight: 1.3 }}>{feature.title}</div>
+                    <div style={{ fontSize: '0.76rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.45 }}>{feature.desc}</div>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </motion.div>
@@ -434,106 +681,640 @@ export default function Academy() {
       </section>
 
       {/* ── PLACEMENTS ── */}
-      <section style={{ padding: '100px 20px', background: 'linear-gradient(180deg,transparent 0%,rgba(124,58,237,0.02) 50%,transparent 100%)' }}>
-        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} style={{ textAlign: 'center', marginBottom: '50px' }}>
-          <h2 style={{ fontSize: 'clamp(2rem,5vw,3rem)', fontWeight: 800, margin: '0 0 16px', letterSpacing: '-0.02em' }}>
+      <section style={{ padding: '100px 20px', background: 'linear-gradient(180deg,transparent 0%,rgba(124,58,237,0.03) 50%,transparent 100%)', position: 'relative', overflow: 'hidden' }}>
+        {/* Animated background glow */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '800px',
+          height: '600px',
+          background: 'radial-gradient(ellipse, rgba(139,92,246,0.08) 0%, transparent 70%)',
+          filter: 'blur(100px)',
+          pointerEvents: 'none',
+          animation: 'pulseGlow 4s ease-in-out infinite'
+        }} />
+
+        <style>{`
+          @keyframes pulseGlow {
+            0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); }
+          }
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+          }
+          @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+          }
+          .brand-card:hover .brand-logo {
+            transform: scale(1.12);
+            filter: grayscale(0%) brightness(1.15) !important;
+          }
+          .brand-card:hover .brand-glow {
+            opacity: 1 !important;
+          }
+          .brand-card:hover {
+            transform: translateY(-8px) !important;
+            border-color: rgba(139,92,246,0.5) !important;
+            box-shadow: 0 20px 60px rgba(124,58,237,0.25), 0 0 0 1px rgba(167,139,250,0.3) !important;
+          }
+          @media (max-width: 768px) {
+            .brand-card { padding: 16px 12px !important; }
+            .brand-card h4 { font-size: 0.7rem !important; }
+          }
+          @media (max-width: 480px) {
+            .story-card { border-radius: 16px !important; }
+          }
+        `}</style>
+
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} style={{ textAlign: 'center', marginBottom: '60px', position: 'relative', zIndex: 2 }}>
+          <motion.span
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 16px',
+              borderRadius: '999px',
+              background: 'rgba(124,58,237,0.15)',
+              border: '1px solid rgba(139,92,246,0.3)',
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              color: '#a78bfa',
+              marginBottom: '20px'
+            }}
+          >
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#a78bfa', boxShadow: '0 0 10px #a78bfa' }} />
+            PLACEMENT PARTNERS
+          </motion.span>
+          <h2 style={{
+            fontSize: 'clamp(2.2rem,5vw,3.5rem)',
+            fontWeight: 800,
+            margin: '0 0 16px',
+            letterSpacing: '-0.03em',
+            background: 'linear-gradient(135deg, #fff 0%, #c4b5fd 50%, #a78bfa 100%)',
+            backgroundSize: '200% auto',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            animation: 'shimmer 4s linear infinite'
+          }}>
             GET PLACED AT
           </h2>
-          <div style={{ width: '60px', height: '4px', background: 'linear-gradient(90deg,#ff4d00,transparent)', borderRadius: '2px', margin: '0 auto 20px' }} />
+          <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '1rem', maxWidth: '550px', margin: '0 auto', lineHeight: 1.6 }}>
+            Join the ranks of professionals working at India&apos;s most innovative media houses and creative agencies
+          </p>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.5 }} style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '12px', maxWidth: '1000px', margin: '0 auto 40px' }}>
+        {/* Brands Grid with Logos */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+            gap: '16px',
+            maxWidth: '1200px',
+            margin: '0 auto 50px',
+            padding: '0 16px',
+            position: 'relative',
+            zIndex: 2
+          }}
+        >
           {displayBrands.map((brand, i) => (
-            <motion.div
+            <motion.a
               key={i}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+              href={brand.websiteLink || '#'}
+              target={brand.websiteLink ? "_blank" : undefined}
+              rel={brand.websiteLink ? "noopener noreferrer" : undefined}
+              className="brand-card"
+              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: i * 0.05 }}
-              whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,77,0,0.1)', borderColor: 'rgba(255,77,0,0.3)' }}
-              style={{ padding: '12px 24px', borderRadius: '999px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', fontSize: '0.85rem', fontWeight: 600, color: 'rgba(255,255,255,0.7)', cursor: 'default', transition: 'all 0.3s ease' }}
+              transition={{ duration: 0.5, delay: i * 0.06 }}
+              whileHover={{ y: -8 }}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '24px 16px',
+                borderRadius: '16px',
+                background: 'linear-gradient(145deg, rgba(30,25,60,0.8) 0%, rgba(20,15,45,0.95) 100%)',
+                border: '1px solid rgba(139,92,246,0.2)',
+                backdropFilter: 'blur(20px)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(139,92,246,0.05)',
+                textDecoration: 'none',
+                cursor: brand.websiteLink ? 'pointer' : 'default',
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+              }}
             >
-              {brand}
-            </motion.div>
+              {/* Glow effect on hover */}
+              <div
+                className="brand-glow"
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'radial-gradient(circle at center, rgba(139,92,246,0.15) 0%, transparent 70%)',
+                  opacity: 0,
+                  transition: 'opacity 0.4s ease',
+                  pointerEvents: 'none'
+                }}
+              />
+
+              {/* Animated border gradient */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileHover={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: '16px',
+                  padding: '1px',
+                  background: 'linear-gradient(135deg, rgba(167,139,250,0.6) 0%, rgba(124,58,237,0.4) 50%, rgba(139,92,246,0.2) 100%)',
+                  WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                  WebkitMaskComposite: 'xor',
+                  maskComposite: 'exclude',
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }}
+              />
+
+              {/* Logo Container */}
+              <div style={{
+                width: '70px',
+                height: '70px',
+                borderRadius: '12px',
+                background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '12px',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                {brand.logoUrl ? (
+                  <img
+                    src={brand.logoUrl}
+                    alt={brand.name}
+                    className="brand-logo"
+                    style={{
+                      width: '50px',
+                      height: '50px',
+                      objectFit: 'contain',
+                      filter: 'grayscale(20%) brightness(0.95)',
+                      transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                    }}
+                  />
+                ) : (
+                  <div style={{
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #7c3aed, #a78bfa)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.2rem',
+                    fontWeight: 700,
+                    color: '#fff'
+                  }}>
+                    {brand.name ? brand.name.charAt(0).toUpperCase() : '?'}
+                  </div>
+                )}
+              </div>
+
+              {/* Brand Name */}
+              <h4 style={{
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                color: 'rgba(255,255,255,0.9)',
+                textAlign: 'center',
+                margin: 0,
+                letterSpacing: '0.02em',
+                lineHeight: 1.3,
+                transition: 'color 0.3s ease'
+              }}>
+                {brand.name || brand}
+              </h4>
+
+              {/* Website indicator */}
+              {brand.websiteLink && (
+                <div style={{
+                  marginTop: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '0.6rem',
+                  color: 'rgba(167,139,250,0.7)',
+                  fontWeight: 600,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase'
+                }}>
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M5 0C2.24 0 0 2.24 0 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 9c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill="currentColor"/>
+                    <path d="M3.5 5h3M5 3.5v3" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round"/>
+                  </svg>
+                  VISIT
+                </div>
+              )}
+            </motion.a>
           ))}
         </motion.div>
 
-        <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }} style={{ textAlign: 'center', fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', maxWidth: '500px', margin: '0 auto 30px' }}>
+        {/* Stats Row */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '40px',
+            flexWrap: 'wrap',
+            marginBottom: '40px',
+            position: 'relative',
+            zIndex: 2
+          }}
+        >
+          {[
+            { value: '50+', label: 'Partner Brands' },
+            { value: '95%', label: 'Placement Rate' },
+            { value: '₹8L', label: 'Avg. Package' }
+          ].map((stat, i) => (
+            <div key={i} style={{ textAlign: 'center' }}>
+              <div style={{
+                fontSize: '1.8rem',
+                fontWeight: 800,
+                background: 'linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                marginBottom: '4px'
+              }}>
+                {stat.value}
+              </div>
+              <div style={{
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                color: 'rgba(255,255,255,0.5)',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase'
+              }}>
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </motion.div>
+
+        <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.4 }} style={{ textAlign: 'center', fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)', maxWidth: '500px', margin: '0 auto 30px', position: 'relative', zIndex: 2 }}>
           Our graduates are making waves at India&apos;s top media houses and creative agencies.
         </motion.p>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.3 }} style={{ textAlign: 'center' }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.5 }} style={{ textAlign: 'center', position: 'relative', zIndex: 2 }}>
           <motion.button
             onClick={() => handleApplyClick('enrollment')}
-            whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,77,0,0.2)' }}
+            whileHover={{ scale: 1.05, boxShadow: '0 10px 40px rgba(124,58,237,0.4)' }}
             whileTap={{ scale: 0.95 }}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 28px', borderRadius: '999px', border: '1px solid rgba(255,77,0,0.5)', color: '#ff6b35', fontWeight: 600, fontSize: '0.85rem', background: 'transparent', cursor: 'pointer', letterSpacing: '0.05em', transition: 'all 0.3s ease' }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '14px 32px',
+              borderRadius: '999px',
+              background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
+              border: 'none',
+              color: '#fff',
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              letterSpacing: '0.05em',
+              boxShadow: '0 4px 20px rgba(124,58,237,0.35), inset 0 1px 0 rgba(255,255,255,0.2)',
+              transition: 'all 0.3s ease'
+            }}
           >
-            START YOUR JOURNEY →
+            START YOUR JOURNEY
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ transition: 'transform 0.3s ease' }}>
+              <path d="M3 9h12M9 3l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </motion.button>
         </motion.div>
       </section>
 
       {/* ── SUCCESS STORIES ── */}
-      <section style={{ padding: '100px 20px', background: 'linear-gradient(180deg,#0a0a0f 0%,#12121a 100%)' }}>
+      <section style={{ padding: '100px 20px', position: 'relative', zIndex: 1 }}>
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} style={{ textAlign: 'center', marginBottom: '60px' }}>
-          <h2 style={{ fontSize: 'clamp(2rem,5vw,3rem)', fontWeight: 800, margin: '0 0 16px', letterSpacing: '-0.02em' }}>
-            OUR <span style={{ color: '#ff4d00' }}>SUCCESS STORIES</span>
+          <motion.span 
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '6px', 
+              padding: '6px 16px', 
+              borderRadius: '999px', 
+              background: 'rgba(120, 50, 255, 0.15)', 
+              border: '1px solid rgba(120, 50, 255, 0.3)', 
+              fontSize: '0.7rem', 
+              fontWeight: 600, 
+              letterSpacing: '0.15em', 
+              textTransform: 'uppercase', 
+              color: '#a78bfa', 
+              marginBottom: '20px' 
+            }}
+          >
+            <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#a78bfa' }} />
+            TESTIMONIALS
+          </motion.span>
+          <h2 style={{ 
+            fontSize: 'clamp(2.2rem,5vw,3.5rem)', 
+            fontWeight: 800, 
+            margin: '0 0 16px', 
+            letterSpacing: '-0.03em',
+            background: 'linear-gradient(135deg, #fff 0%, #a78bfa 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
+            Success Stories
           </h2>
-          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>
-            People who learned from us and are now crushing it.
+          <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '1.05rem', maxWidth: '550px', margin: '0 auto', lineHeight: 1.6 }}>
+            People who learned from us and are now crushing it in the industry.
           </p>
         </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '24px', maxWidth: '1200px', margin: '0 auto' }}>
-          {displayStories.map((story, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              whileHover={{ y: -8, borderColor: 'rgba(255,77,0,0.3)' }}
-              style={{
-                padding: '32px',
-                borderRadius: '20px',
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                position: 'relative',
-                overflow: 'hidden'
-              }}
-            >
-              {/* Avatar */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-                {story.imageUrl ? (
-                  <img src={story.imageUrl} alt={story.name} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,77,0,0.3)' }} />
-                ) : (
-                  <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'linear-gradient(135deg, #ff4d00, #ff6b35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 700, color: '#fff' }}>
-                    {story.initials}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: '24px', maxWidth: '1400px', margin: '0 auto', padding: '0 16px' }}>
+          {displayStories.map((story, i) => {
+            // Split quote into lines of max 5 words each
+            const words = story.quote ? story.quote.split(' ') : [];
+            const lines = [];
+            for (let j = 0; j < words.length; j += 5) {
+              lines.push(words.slice(j, j + 5).join(' '));
+            }
+
+            return (
+              <motion.div
+                key={i}
+                className="story-card"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.08 }}
+                whileHover={{ y: -10, transition: { duration: 0.3 } }}
+                style={{
+                  borderRadius: '24px',
+                  background: 'linear-gradient(160deg, rgba(30,20,60,0.95) 0%, rgba(15,10,35,0.98) 100%)',
+                  border: '1px solid rgba(139,92,246,0.18)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  backdropFilter: 'blur(24px)',
+                  boxShadow: '0 8px 40px rgba(0,0,0,0.45), 0 0 0 1px rgba(139,92,246,0.08)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
+                }}
+              >
+                {/* Hover border glow */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  whileHover={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    borderRadius: '24px',
+                    padding: '1px',
+                    background: 'linear-gradient(135deg, rgba(167,139,250,0.7) 0%, rgba(124,58,237,0.5) 50%, rgba(167,139,250,0.3) 100%)',
+                    WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                    WebkitMaskComposite: 'xor',
+                    maskComposite: 'exclude',
+                    pointerEvents: 'none',
+                    zIndex: 3
+                  }}
+                />
+
+                {/* ── TOP HALF: IMAGE ── */}
+                <div style={{ position: 'relative', height: '240px', overflow: 'hidden', borderRadius: '24px 24px 0 0', flexShrink: 0 }}>
+                  {story.imageUrl ? (
+                    <img
+                      src={story.imageUrl}
+                      alt={story.name}
+                      className={`story-img-${i}`}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        objectPosition: 'center center',
+                        display: 'block',
+                        transition: 'transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94)',
+                      }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: '100%',
+                      height: '100%',
+                      background: 'linear-gradient(135deg, #4c1d95 0%, #7c3aed 50%, #a78bfa 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '4rem',
+                      fontWeight: 800,
+                      color: 'rgba(255,255,255,0.9)',
+                      letterSpacing: '-0.02em',
+                      textShadow: '0 4px 20px rgba(0,0,0,0.3)'
+                    }}>
+                      {story.initials || story.name?.charAt(0) || '?'}
+                    </div>
+                  )}
+
+                  {/* Gradient fade at bottom of image */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: '70px',
+                    background: 'linear-gradient(to bottom, transparent 0%, rgba(15,10,35,0.97) 100%)',
+                    pointerEvents: 'none',
+                    zIndex: 1
+                  }} />
+
+                  {/* Package badge — top-right corner */}
+                  {story.earning && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '12px',
+                      right: '12px',
+                      padding: '5px 12px',
+                      borderRadius: '999px',
+                      background: 'linear-gradient(135deg, rgba(124,58,237,0.92) 0%, rgba(167,139,250,0.88) 100%)',
+                      border: '1px solid rgba(255,255,255,0.25)',
+                      backdropFilter: 'blur(12px)',
+                      fontSize: '0.72rem',
+                      fontWeight: 800,
+                      color: '#fff',
+                      letterSpacing: '0.04em',
+                      boxShadow: '0 4px 16px rgba(124,58,237,0.55)',
+                      zIndex: 3,
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {story.earning}
+                    </div>
+                  )}
+
+                  {/* Social link overlay on hover */}
+                  {story.socialLink && (
+                    <a
+                      href={story.socialLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'rgba(0,0,0,0)',
+                        transition: 'background 0.35s ease',
+                        zIndex: 2,
+                        textDecoration: 'none'
+                      }}
+                      className="image-hover-overlay"
+                    >
+                      <span style={{
+                        opacity: 0,
+                        transform: 'translateY(8px)',
+                        transition: 'all 0.35s ease',
+                        color: '#fff',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        background: 'rgba(124,58,237,0.85)',
+                        padding: '8px 16px',
+                        borderRadius: '999px',
+                        backdropFilter: 'blur(8px)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        letterSpacing: '0.05em'
+                      }} className="profile-link-btn">
+                        🔗 View Profile
+                      </span>
+                    </a>
+                  )}
+                </div>
+
+                {/* ── BOTTOM HALF: INFO ── */}
+                <div style={{ padding: '20px 22px 22px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+
+                  {/* Name */}
+                  <h4 style={{
+                    fontSize: '1.05rem',
+                    fontWeight: 800,
+                    color: '#fff',
+                    margin: '0 0 4px 0',
+                    letterSpacing: '0.01em',
+                    lineHeight: 1.2,
+                    WebkitFontSmoothing: 'antialiased'
+                  }}>
+                    {story.name}
+                  </h4>
+
+                  {/* Organization */}
+                  {story.company && (
+                    <p style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      color: '#a78bfa',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.12em',
+                      margin: '0 0 14px 0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}>
+                      <span style={{
+                        display: 'inline-block',
+                        width: '16px',
+                        height: '2px',
+                        background: 'linear-gradient(90deg, #7c3aed, #a78bfa)',
+                        borderRadius: '1px',
+                        flexShrink: 0
+                      }} />
+                      {story.company}
+                    </p>
+                  )}
+
+                  {/* Divider */}
+                  <div style={{
+                    width: '100%',
+                    height: '1px',
+                    background: 'linear-gradient(90deg, rgba(139,92,246,0.4) 0%, rgba(139,92,246,0.05) 100%)',
+                    marginBottom: '14px'
+                  }} />
+
+                  {/* Quote — auto-scrollable StoryQuote */}
+                  <StoryQuote lines={lines} />
+
+                  {/* Role tag at bottom */}
+                  <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      color: 'rgba(167,139,250,0.7)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      background: 'rgba(124,58,237,0.12)',
+                      border: '1px solid rgba(124,58,237,0.2)'
+                    }}>
+                      {story.role}
+                    </span>
+                    {story.socialLink && (
+                      <a
+                        href={story.socialLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          color: '#a78bfa',
+                          textDecoration: 'none',
+                          letterSpacing: '0.08em',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          transition: 'color 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = '#a78bfa'}
+                      >
+                        VIEW →
+                      </a>
+                    )}
                   </div>
-                )}
-                <div>
-                  <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', margin: 0 }}>{story.name}</h4>
-                  <p style={{ fontSize: '0.75rem', fontWeight: 600, color: '#ff4d00', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>{story.role}</p>
                 </div>
-              </div>
-
-              {/* Quote */}
-              <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, marginBottom: '20px', fontStyle: 'italic' }}>
-                &ldquo;{story.quote}&rdquo;
-              </p>
-
-              {/* Stats */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                <div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff' }}>{story.earning}</div>
-                </div>
-                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  {story.company}
-                </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
 
           {/* Your Story Card - CTA */}
           <motion.div

@@ -50,7 +50,7 @@ function MagneticLink({ children, to, className, isActive, onClick }) {
               left: '0',
               right: '0',
               height: '2px',
-              background: 'linear-gradient(90deg, #FF3D10, #E4F141)',
+              background: 'linear-gradient(90deg, #a78bfa, #7c3aed)',
               borderRadius: '2px',
             }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
@@ -125,7 +125,7 @@ export default function Navbar() {
         .brand-glow {
           position: absolute;
           inset: -10px;
-          background: radial-gradient(circle at center, rgba(228,241,65,0.3) 0%, transparent 70%);
+          background: radial-gradient(circle at center, rgba(167,139,250,0.35) 0%, transparent 70%);
           filter: blur(20px);
           opacity: 0;
           transition: opacity 0.3s ease;
@@ -134,34 +134,49 @@ export default function Navbar() {
         .brand-mark:hover .brand-glow {
           opacity: 1;
         }
+        .nav-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .desktop-nav {
+          display: flex;
+          align-items: center;
+          gap: 28px;
+        }
         .desktop-nav a {
           position: relative;
           overflow: visible;
           font-family: 'Plus Jakarta Sans', sans-serif;
-          font-weight: 600;
-          letter-spacing: 0.02em;
-          transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+          font-weight: 500;
+          font-size: 0.85rem;
+          letter-spacing: 0.01em;
+          transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+          padding: 6px 0;
         }
         .desktop-nav a:hover {
           transform: translateY(-2px);
-          text-shadow: 0 4px 20px rgba(228, 241, 65, 0.3);
+          text-shadow: 0 4px 20px rgba(167, 139, 250, 0.4);
+          color: #a78bfa;
         }
         .nav-cta {
           position: relative;
           overflow: hidden;
-          padding: 0.5rem 1rem !important;
-          font-size: 0.8rem !important;
-          min-height: 36px;
+          padding: 0.45rem 0.9rem !important;
+          font-size: 0.75rem !important;
+          min-height: 32px;
           display: flex;
           align-items: center;
           justify-content: center;
           font-family: 'Plus Jakarta Sans', sans-serif;
-          font-weight: 700;
+          font-weight: 600;
+          letter-spacing: 0.02em;
           transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+          border-radius: 10px;
         }
         .nav-cta:hover {
           transform: translateY(-3px) scale(1.02);
-          box-shadow: 0 20px 40px rgba(228, 241, 65, 0.3);
+          box-shadow: 0 20px 40px rgba(139, 92, 246, 0.35);
         }
         .nav-cta::before {
           content: '';
@@ -176,6 +191,30 @@ export default function Navbar() {
         .nav-cta:hover::before {
           left: 100%;
         }
+        .theme-toggle-btn {
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(10px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+          padding: 0;
+        }
+        .theme-toggle-btn:hover {
+          background: rgba(139, 92, 246, 0.12);
+          border-color: rgba(167, 139, 250, 0.4);
+          transform: translateY(-2px);
+        }
+        :root.light-theme .theme-toggle-btn {
+          border-color: rgba(0, 0, 0, 0.1);
+          background: rgba(0, 0, 0, 0.05);
+        }
         .mobile-nav-link {
           position: relative;
           overflow: hidden;
@@ -188,7 +227,7 @@ export default function Navbar() {
           left: 0;
           width: 0;
           height: 2px;
-          background: linear-gradient(90deg, #FF3D10, #E4F141);
+          background: linear-gradient(90deg, #a78bfa, #7c3aed);
           transition: width 0.3s ease;
         }
         .mobile-nav-link:hover::after,
@@ -210,21 +249,21 @@ export default function Navbar() {
             width: 44px;
             height: 44px;
             border-radius: 12px;
-            border: 2px solid rgba(228, 241, 65, 0.5);
-            background: rgba(228, 241, 65, 0.1);
+            border: 2px solid rgba(139, 92, 246, 0.5);
+            background: rgba(139, 92, 246, 0.12);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             cursor: pointer;
             padding: 10px;
             gap: 4px;
             transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-            box-shadow: 0 4px 15px rgba(228, 241, 65, 0.2);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.25);
           }
           .menu-toggle:hover {
-            background: rgba(228, 241, 65, 0.2);
-            border-color: rgba(228, 241, 65, 0.8);
+            background: rgba(139, 92, 246, 0.2);
+            border-color: rgba(167, 139, 250, 0.8);
             transform: scale(1.05);
-            box-shadow: 0 6px 25px rgba(228, 241, 65, 0.35);
+            box-shadow: 0 6px 25px rgba(139, 92, 246, 0.4);
           }
           :root.light-theme .menu-toggle {
             border: 2px solid rgba(124, 58, 237, 0.5);
@@ -242,7 +281,8 @@ export default function Navbar() {
             height: 2.5px;
             border-radius: 3px;
             transition: all 0.3s ease;
-            box-shadow: 0 0 8px rgba(228, 241, 65, 0.5);
+            box-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
+            background: linear-gradient(90deg, #a78bfa, #8b5cf6);
           }
           :root.light-theme .menu-toggle span {
             box-shadow: 0 0 8px rgba(124, 58, 237, 0.5);

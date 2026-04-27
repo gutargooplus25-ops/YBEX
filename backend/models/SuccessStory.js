@@ -6,6 +6,7 @@ const successStorySchema = new mongoose.Schema({
   quote: { type: String, required: true },
   earning: { type: String, required: true },
   company: { type: String, required: true },
+  socialLink: { type: String, default: '', trim: true },
   imageUrl: { type: String, default: null },
   initials: { type: String, default: '' },
   isActive: { type: Boolean, default: true },
