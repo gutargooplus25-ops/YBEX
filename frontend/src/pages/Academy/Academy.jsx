@@ -98,6 +98,351 @@ const staticSuccessStories = [
   { name: 'ANANYA SHARMA', role: 'INFLUENCER & SPEAKER', quote: 'I was just a student. YBEX built my profile and now brands pay me lakhs.', earning: '₹6.2L/mo', company: 'SELF-BUILT', initials: 'AS' },
 ];
 
+/* ─── CIRCULAR WAVE CAROUSEL - NO OVERLAP, SMOOTH ROTATION ─────────── */
+function BrandSpiralGalaxy({ brands }) {
+  const [rotation, setRotation] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const animationRef = useRef(null);
+
+  if (!brands || brands.length === 0) return null;
+
+  // Ensure we have exactly 12 brands for perfect spacing
+  const targetCount = 12;
+  const displayBrands = brands.length < targetCount 
+    ? [...Array(Math.ceil(targetCount / brands.length))].flatMap(() => brands).slice(0, targetCount)
+    : brands.slice(0, targetCount);
+
+  useEffect(() => {
+    if (isPaused) return;
+    
+    let lastTime = Date.now();
+    const animate = () => {
+      const now = Date.now();
+      const delta = (now - lastTime) / 1000;
+      lastTime = now;
+      
+      setRotation(prev => (prev + delta * 10) % 360); // Smooth 10 degrees per second
+      animationRef.current = requestAnimationFrame(animate);
+    };
+    
+    animationRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    };
+  }, [isPaused]);
+
+  return (
+    <div
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      style={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: '1000px',
+        height: '500px', // Increased height for proper spacing
+        margin: '80px auto 120px', // More margins for text safety
+        overflow: 'visible',
+      }}
+    >
+      {/* Central glow core */}
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '150px',
+        height: '150px',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(124,58,237,0.3) 0%, rgba(167,139,250,0.15) 30%, transparent 70%)',
+        filter: 'blur(50px)',
+        animation: 'pulse 3s ease-in-out infinite',
+        pointerEvents: 'none',
+        zIndex: 0,
+      }} />
+
+      {/* Three concentric circles - PROPER SPACING, NO OVERLAP */}
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '100%',
+        height: '100%',
+      }}>
+        {/* Inner Circle - 4 brands with proper spacing */}
+        {displayBrands.slice(0, 4).map((brand, i) => {
+          const angle = (i / 4) * 360 + rotation;
+          const radius = 110; // Increased for better spacing
+          const x = Math.cos((angle * Math.PI) / 180) * radius;
+          const y = Math.sin((angle * Math.PI) / 180) * radius;
+          const isHovered = hoveredIndex === i;
+
+          return (
+            <div
+              key={`inner-${i}`}
+              onMouseEnter={() => setHoveredIndex(i)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                transform: `translate(-50%, -50%) translate(${x}px, ${y}px) scale(${isHovered ? 1.12 : 1})`,
+                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                zIndex: isHovered ? 100 : 10,
+              }}
+            >
+              <BrandWaveCard brand={brand} isHovered={isHovered} size="medium" />
+            </div>
+          );
+        })}
+
+        {/* Middle Circle - 4 brands with proper spacing */}
+        {displayBrands.slice(4, 8).map((brand, i) => {
+          const angle = (i / 4) * 360 + rotation + 45; // Offset by 45 degrees
+          const radius = 200; // Increased for better spacing
+          const x = Math.cos((angle * Math.PI) / 180) * radius;
+          const y = Math.sin((angle * Math.PI) / 180) * radius;
+          const isHovered = hoveredIndex === (i + 4);
+
+          return (
+            <div
+              key={`middle-${i}`}
+              onMouseEnter={() => setHoveredIndex(i + 4)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                transform: `translate(-50%, -50%) translate(${x}px, ${y}px) scale(${isHovered ? 1.12 : 1})`,
+                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                zIndex: isHovered ? 100 : 8,
+              }}
+            >
+              <BrandWaveCard brand={brand} isHovered={isHovered} size="medium" />
+            </div>
+          );
+        })}
+
+        {/* Outer Circle - 4 brands with proper spacing */}
+        {displayBrands.slice(8, 12).map((brand, i) => {
+          const angle = (i / 4) * 360 + rotation; // Same as inner for symmetry
+          const radius = 290; // Increased for better spacing
+          const x = Math.cos((angle * Math.PI) / 180) * radius;
+          const y = Math.sin((angle * Math.PI) / 180) * radius;
+          const isHovered = hoveredIndex === (i + 8);
+
+          return (
+            <div
+              key={`outer-${i}`}
+              onMouseEnter={() => setHoveredIndex(i + 8)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                transform: `translate(-50%, -50%) translate(${x}px, ${y}px) scale(${isHovered ? 1.12 : 1})`,
+                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                zIndex: isHovered ? 100 : 6,
+              }}
+            >
+              <BrandWaveCard brand={brand} isHovered={isHovered} size="medium" />
+            </div>
+          );
+        })}
+      </div>
+
+      {/* NO DECORATIVE RINGS - Removed as per request */}
+
+      {/* Pause indicator */}
+      {isPaused && (
+        <div style={{
+          position: 'absolute',
+          bottom: '-60px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '10px 20px',
+          borderRadius: '999px',
+          background: 'rgba(124,58,237,0.25)',
+          border: '1px solid rgba(167,139,250,0.4)',
+          backdropFilter: 'blur(12px)',
+          boxShadow: '0 4px 20px rgba(124,58,237,0.3)',
+        }}>
+          <div style={{
+            width: '10px',
+            height: '10px',
+            borderRadius: '50%',
+            background: '#a78bfa',
+            boxShadow: '0 0 12px #a78bfa',
+          }} />
+          <span style={{
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            color: '#e9d5ff',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+          }}>
+            Carousel Paused
+          </span>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+          50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.5; }
+        }
+        @media (max-width: 768px) {
+          /* Mobile adjustments handled in component */
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function BrandWaveCard({ brand, isHovered, size = 'medium' }) {
+  const name = brand.name || brand;
+  const logo = brand.logoUrl;
+  const link = brand.websiteLink;
+  const Tag = link ? 'a' : 'div';
+  const linkProps = link ? { href: link, target: '_blank', rel: 'noopener noreferrer' } : {};
+
+  return (
+    <Tag
+      {...linkProps}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '10px',
+        padding: '0',
+        minWidth: 'auto',
+        minHeight: 'auto',
+        borderRadius: '0',
+        background: 'transparent',
+        border: 'none',
+        backdropFilter: 'none',
+        WebkitBackdropFilter: 'none',
+        boxShadow: 'none',
+        textDecoration: 'none',
+        cursor: link ? 'pointer' : 'default',
+        position: 'relative',
+        overflow: 'visible',
+        transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+      }}
+    >
+      {/* Logo ONLY - NO BORDERS, NO BACKGROUND */}
+      <div style={{
+        width: '70px',
+        height: '70px',
+        borderRadius: '0',
+        background: 'transparent',
+        border: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'visible',
+        position: 'relative',
+        zIndex: 1,
+        boxShadow: 'none',
+        transition: 'all 0.3s ease',
+        transform: isHovered ? 'scale(1.15)' : 'scale(1)',
+      }}>
+        {logo ? (
+          <img
+            src={logo}
+            alt={name}
+            style={{
+              width: '70px',
+              height: '70px',
+              objectFit: 'contain',
+              filter: isHovered 
+                ? 'brightness(1.2) contrast(1.1) drop-shadow(0 4px 20px rgba(124,58,237,0.7))' 
+                : 'brightness(1) contrast(1) drop-shadow(0 2px 10px rgba(0,0,0,0.4))',
+              transition: 'filter 0.3s ease',
+            }}
+          />
+        ) : (
+          <span style={{
+            fontSize: '2rem',
+            fontWeight: 900,
+            color: isHovered ? '#fff' : '#f3e8ff',
+            textShadow: isHovered 
+              ? '0 0 30px rgba(167,139,250,1), 0 4px 15px rgba(0,0,0,0.7)' 
+              : '0 3px 12px rgba(0,0,0,0.8)',
+            transition: 'all 0.3s ease',
+          }}>
+            {name.charAt(0).toUpperCase()}
+          </span>
+        )}
+      </div>
+
+      {/* Name with proper spacing */}
+      <span style={{
+        fontSize: '0.8rem',
+        fontWeight: isHovered ? 800 : 700,
+        color: isHovered ? '#fff' : 'rgba(255,255,255,0.98)',
+        letterSpacing: '0.05em', // Increased letter spacing
+        textAlign: 'center',
+        position: 'relative',
+        zIndex: 1,
+        textShadow: isHovered 
+          ? '0 3px 15px rgba(0,0,0,0.6), 0 0 25px rgba(124,58,237,0.7)' 
+          : '0 2px 10px rgba(0,0,0,0.8)',
+        transition: 'all 0.4s ease',
+        maxWidth: '100px', // Reduced to prevent overlap
+        lineHeight: 1.5, // Increased line height for better spacing
+        wordBreak: 'break-word',
+        display: '-webkit-box',
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden',
+        marginTop: '6px', // Gap between logo and text
+      }}>
+        {name}
+      </span>
+
+      {/* Link arrow */}
+      {link && isHovered && (
+        <div style={{
+          position: 'absolute',
+          top: '12px',
+          right: '12px',
+          width: '28px',
+          height: '28px',
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.3)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '0.9rem',
+          color: '#fff',
+          fontWeight: 'bold',
+          animation: 'bounce 0.6s ease-in-out infinite',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.4)',
+        }}>
+          ↗
+        </div>
+      )}
+
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: -200% -200%; }
+          100% { background-position: 200% 200%; }
+        }
+        @keyframes bounce {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(3px, -3px); }
+        }
+      `}</style>
+    </Tag>
+  );
+}
+
 /* ─── ANIMATION VARIANTS ────────────────────────────────────────────── */
 const fadeUp = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0 } };
 const stagger = { show: { transition: { staggerChildren: 0.1 } } };
@@ -774,167 +1119,8 @@ export default function Academy() {
           </p>
         </motion.div>
 
-        {/* Brands Grid with Logos */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-            gap: '16px',
-            maxWidth: '1200px',
-            margin: '0 auto 50px',
-            padding: '0 16px',
-            position: 'relative',
-            zIndex: 2
-          }}
-        >
-          {displayBrands.map((brand, i) => (
-            <motion.a
-              key={i}
-              href={brand.websiteLink || '#'}
-              target={brand.websiteLink ? "_blank" : undefined}
-              rel={brand.websiteLink ? "noopener noreferrer" : undefined}
-              className="brand-card"
-              initial={{ opacity: 0, y: 30, scale: 0.9 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.06 }}
-              whileHover={{ y: -8 }}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '24px 16px',
-                borderRadius: '16px',
-                background: 'linear-gradient(145deg, rgba(30,25,60,0.8) 0%, rgba(20,15,45,0.95) 100%)',
-                border: '1px solid rgba(139,92,246,0.2)',
-                backdropFilter: 'blur(20px)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(139,92,246,0.05)',
-                textDecoration: 'none',
-                cursor: brand.websiteLink ? 'pointer' : 'default',
-                position: 'relative',
-                overflow: 'hidden',
-                transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-              }}
-            >
-              {/* Glow effect on hover */}
-              <div
-                className="brand-glow"
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: 'radial-gradient(circle at center, rgba(139,92,246,0.15) 0%, transparent 70%)',
-                  opacity: 0,
-                  transition: 'opacity 0.4s ease',
-                  pointerEvents: 'none'
-                }}
-              />
-
-              {/* Animated border gradient */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                whileHover={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  borderRadius: '16px',
-                  padding: '1px',
-                  background: 'linear-gradient(135deg, rgba(167,139,250,0.6) 0%, rgba(124,58,237,0.4) 50%, rgba(139,92,246,0.2) 100%)',
-                  WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                  WebkitMaskComposite: 'xor',
-                  maskComposite: 'exclude',
-                  pointerEvents: 'none',
-                  zIndex: 1
-                }}
-              />
-
-              {/* Logo Container */}
-              <div style={{
-                width: '70px',
-                height: '70px',
-                borderRadius: '12px',
-                background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '12px',
-                position: 'relative',
-                overflow: 'hidden'
-              }}>
-                {brand.logoUrl ? (
-                  <img
-                    src={brand.logoUrl}
-                    alt={brand.name}
-                    className="brand-logo"
-                    style={{
-                      width: '50px',
-                      height: '50px',
-                      objectFit: 'contain',
-                      filter: 'grayscale(20%) brightness(0.95)',
-                      transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-                    }}
-                  />
-                ) : (
-                  <div style={{
-                    width: '50px',
-                    height: '50px',
-                    borderRadius: '8px',
-                    background: 'linear-gradient(135deg, #7c3aed, #a78bfa)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.2rem',
-                    fontWeight: 700,
-                    color: '#fff'
-                  }}>
-                    {brand.name ? brand.name.charAt(0).toUpperCase() : '?'}
-                  </div>
-                )}
-              </div>
-
-              {/* Brand Name */}
-              <h4 style={{
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                color: 'rgba(255,255,255,0.9)',
-                textAlign: 'center',
-                margin: 0,
-                letterSpacing: '0.02em',
-                lineHeight: 1.3,
-                transition: 'color 0.3s ease'
-              }}>
-                {brand.name || brand}
-              </h4>
-
-              {/* Website indicator */}
-              {brand.websiteLink && (
-                <div style={{
-                  marginTop: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  fontSize: '0.6rem',
-                  color: 'rgba(167,139,250,0.7)',
-                  fontWeight: 600,
-                  letterSpacing: '0.1em',
-                  textTransform: 'uppercase'
-                }}>
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                    <path d="M5 0C2.24 0 0 2.24 0 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 9c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill="currentColor"/>
-                    <path d="M3.5 5h3M5 3.5v3" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round"/>
-                  </svg>
-                  VISIT
-                </div>
-              )}
-            </motion.a>
-          ))}
-        </motion.div>
+        {/* 3D Spiral Galaxy Carousel */}
+        <BrandSpiralGalaxy brands={displayBrands} />
 
         {/* Stats Row */}
         <motion.div
@@ -955,7 +1141,7 @@ export default function Academy() {
           {[
             { value: '50+', label: 'Partner Brands' },
             { value: '95%', label: 'Placement Rate' },
-            { value: '₹8L', label: 'Avg. Package' }
+            { value: '8LPA', label: 'Avg. Package' }
           ].map((stat, i) => (
             <div key={i} style={{ textAlign: 'center' }}>
               <div style={{
@@ -1015,8 +1201,6 @@ export default function Academy() {
           </motion.button>
         </motion.div>
       </section>
-
-      {/* ── SUCCESS STORIES ── */}
       <section style={{ padding: '100px 20px', position: 'relative', zIndex: 1 }}>
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} style={{ textAlign: 'center', marginBottom: '60px' }}>
           <motion.span 
