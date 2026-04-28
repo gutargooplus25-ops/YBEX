@@ -6,5 +6,7 @@ const hiringSchema = new mongoose.Schema({
   position:   { type: String, default: '' },
   resumeLink: { type: String, default: '' },
   status:     { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
+  deletedAt: { type: Date, default: null },
+  deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
 }, { timestamps: true });
 module.exports = mongoose.model('HiringApplication', hiringSchema);

@@ -21,7 +21,7 @@ const createSuggestion = async (req, res, next) => {
 // @route   GET /api/suggestions
 const getAllSuggestions = async (req, res, next) => {
   try {
-    const suggestions = await Suggestion.find().populate('submittedBy', 'name email');
+    const suggestions = await Suggestion.find({ deletedAt: null }).populate('submittedBy', 'name email');
     res.json({ success: true, count: suggestions.length, suggestions });
   } catch (error) {
     next(error);
@@ -49,9 +49,15 @@ const updateSuggestionStatus = async (req, res, next) => {
 // @route   DELETE /api/suggestions/:id
 const deleteSuggestion = async (req, res, next) => {
   try {
-    const suggestion = await Suggestion.findByIdAndDelete(req.params.id);
+    const suggestion = await Suggestion.findById(req.params.id);
     if (!suggestion) return res.status(404).json({ message: 'Suggestion not found' });
-    res.json({ success: true, message: 'Suggestion deleted' });
+
+    // Soft delete
+    suggestion.deletedAt = new Date();
+    suggestion.deletedBy = req.user?._id;
+    await suggestion.save();
+
+    res.json({ success: true, message: 'Suggestion moved to bin' });
   } catch (error) {
     next(error);
   }

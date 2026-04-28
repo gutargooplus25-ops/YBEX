@@ -24,6 +24,8 @@ import AdminBrands from './pages/Admin/AdminBrands';
 import AdminPlaceholder from './pages/Admin/AdminPlaceholder';
 import AdminInvoices from './pages/Admin/AdminInvoices';
 import AdminSuccessStories from './pages/Admin/AdminSuccessStories';
+import AdminActivity from './pages/Admin/AdminActivity';
+import AdminBin from './pages/Admin/AdminBin';
 import SubAdminDashboard from './pages/Admin/SubAdminDashboard';
 
 // Wraps public pages with Navbar + Footer
@@ -65,11 +67,11 @@ export default function App() {
       <Route path="/admin/school-mentors" element={<AdminRoute><AdminPlaceholder title="School Mentors" icon="🎓" description="Manage school mentor profiles and assignments." /></AdminRoute>} />
       <Route path="/admin/success-stories" element={<AdminRoute><AdminSuccessStories /></AdminRoute>} />
       <Route path="/admin/scholarship" element={<AdminRoute><AdminPlaceholder title="Scholarship" icon="🎖️" description="Manage scholarship applications and awards." /></AdminRoute>} />
-      <Route path="/admin/activity-logs" element={<AdminRoute><AdminPlaceholder title="Activity Logs" icon="📊" description="View all admin and user activity logs." /></AdminRoute>} />
+      <Route path="/admin/activity-logs" element={<AdminRoute><AdminActivity /></AdminRoute>} />
       <Route path="/admin/invoices" element={<AdminRoute><AdminInvoices /></AdminRoute>} />
       <Route path="/admin/ybex-story" element={<AdminRoute><AdminPlaceholder title="YBEX Story" icon="📖" description="Manage the YBEX brand story and timeline." /></AdminRoute>} />
       <Route path="/admin/portfolio" element={<AdminRoute><AdminPlaceholder title="Portfolio" icon="🗂️" description="Manage portfolio projects and case studies." /></AdminRoute>} />
-      <Route path="/admin/bin" element={<AdminRoute><AdminPlaceholder title="Bin" icon="🗑️" description="Review and restore deleted items." /></AdminRoute>} />
+      <Route path="/admin/bin" element={<AdminRoute><AdminBin /></AdminRoute>} />
       <Route path="/admin/website-settings" element={<AdminRoute><AdminPlaceholder title="Website Settings" icon="⚙️" description="Configure global website settings and preferences." /></AdminRoute>} />
     </Routes>
   );

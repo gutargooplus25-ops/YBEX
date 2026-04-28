@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'motion/react';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'motion/react';
 import { navItems } from '../../content/siteData';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -66,7 +66,6 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [hoveredItem, setHoveredItem] = useState(null);
   const location = useLocation();
-  const menuRef = useRef(null);
   const { theme, toggleTheme } = useTheme();
 
   // Don't render on admin pages
@@ -82,16 +81,6 @@ export default function Navbar() {
   // Close menu on route change
   useEffect(() => { setIsOpen(false); }, [location.pathname]);
 
-  // Close menu on outside click
-  useEffect(() => {
-    if (!isOpen) return;
-    const handler = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setIsOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [isOpen]);
-
   // Prevent body scroll when menu open on mobile
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
@@ -104,23 +93,119 @@ export default function Navbar() {
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
         .site-header {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 900;
           transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
           height: auto;
           min-height: 60px;
+          display: flex;
+          justify-content: center;
+          padding: 12px 20px 0;
+          background: transparent !important;
+          border: none !important;
+          backdrop-filter: none !important;
         }
-        .site-header.is-scrolled {
-          background: rgba(10, 10, 10, 0.85);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        .site-header .container {
+          max-width: 1200px;
+          width: 100%;
+          margin: 0 auto;
+          padding: 0;
         }
-        :root.light-theme .site-header.is-scrolled {
-          background: rgba(250, 250, 250, 0.9);
-          border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        .nav-shell {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 24px;
+          height: 56px;
+          gap: 20px;
+          border-radius: 999px;
+          background: rgba(12, 8, 28, 0.75);
+          border: 1.5px solid rgba(139, 92, 246, 0.35);
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          box-shadow:
+            0 0 0 1px rgba(167, 139, 250, 0.08),
+            0 8px 32px rgba(0, 0, 0, 0.4),
+            0 0 60px rgba(124, 58, 237, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+          transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+          position: relative;
+        }
+        /* Animated gradient border glow */
+        .nav-shell::before {
+          content: '';
+          position: absolute;
+          inset: -1px;
+          border-radius: 999px;
+          background: linear-gradient(
+            135deg,
+            rgba(167, 139, 250, 0.5) 0%,
+            rgba(124, 58, 237, 0.3) 25%,
+            rgba(139, 92, 246, 0.1) 50%,
+            rgba(124, 58, 237, 0.3) 75%,
+            rgba(167, 139, 250, 0.5) 100%
+          );
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          padding: 1.5px;
+          pointer-events: none;
+          opacity: 0.7;
+          transition: opacity 0.4s ease;
+        }
+        .nav-shell:hover::before {
+          opacity: 1;
+        }
+        /* Scrolled state - stronger glow */
+        .site-header.is-scrolled .nav-shell {
+          background: rgba(8, 5, 20, 0.88);
+          border-color: rgba(139, 92, 246, 0.5);
+          box-shadow:
+            0 0 0 1px rgba(167, 139, 250, 0.12),
+            0 12px 40px rgba(0, 0, 0, 0.5),
+            0 0 80px rgba(124, 58, 237, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        :root.light-theme .nav-shell {
+          background: rgba(255, 255, 255, 0.88);
+          border-color: rgba(124, 58, 237, 0.25);
+          box-shadow:
+            0 0 0 1px rgba(124, 58, 237, 0.06),
+            0 8px 32px rgba(0, 0, 0, 0.1),
+            0 0 60px rgba(124, 58, 237, 0.06),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+        :root.light-theme .nav-shell::before {
+          background: linear-gradient(
+            135deg,
+            rgba(124, 58, 237, 0.4) 0%,
+            rgba(167, 139, 250, 0.2) 50%,
+            rgba(124, 58, 237, 0.4) 100%
+          );
+        }
+        :root.light-theme .site-header.is-scrolled .nav-shell {
+          background: rgba(255, 255, 255, 0.95);
+          border-color: rgba(124, 58, 237, 0.35);
         }
         .brand-mark {
           position: relative;
           overflow: visible;
+          display: flex;
+          align-items: center;
+          text-decoration: none;
+        }
+        .brand-mark-word {
+          font-size: 1.5rem;
+          font-weight: 800;
+          letter-spacing: 0.02em;
+          color: #fff;
+          background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
         .brand-glow {
           position: absolute;
@@ -142,7 +227,8 @@ export default function Navbar() {
         .desktop-nav {
           display: flex;
           align-items: center;
-          gap: 28px;
+          gap: 24px;
+          margin-left: auto;
         }
         .desktop-nav a {
           position: relative;
@@ -194,14 +280,14 @@ export default function Navbar() {
         .theme-toggle-btn {
           width: 36px;
           height: 36px;
-          border-radius: 10px;
+          borderRadius: 10px;
           border: 1px solid rgba(255, 255, 255, 0.12);
           background: rgba(255, 255, 255, 0.05);
           backdrop-filter: blur(10px);
           display: flex;
           align-items: center;
-          justify-content: center;
-          font-size: 1rem;
+          justifyContent: center;
+          fontSize: 1rem;
           cursor: pointer;
           transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
           padding: 0;
@@ -215,65 +301,36 @@ export default function Navbar() {
           border-color: rgba(0, 0, 0, 0.1);
           background: rgba(0, 0, 0, 0.05);
         }
-        .mobile-nav-link {
-          position: relative;
-          overflow: hidden;
-          font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .mobile-nav-link::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 0;
-          height: 2px;
-          background: linear-gradient(90deg, #a78bfa, #7c3aed);
-          transition: width 0.3s ease;
-        }
-        .mobile-nav-link:hover::after,
-        .mobile-nav-link.is-active::after {
-          width: 100%;
-        }
         
-        /* Enhanced Menu Toggle - More Visible */
+        /* Menu Toggle */
         .menu-toggle {
           display: none;
         }
         
         @media (max-width: 960px) {
+          .desktop-nav { display: none !important; }
+          .nav-cta { display: none !important; }
           .menu-toggle {
             display: flex !important;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
+            width: 42px;
+            height: 42px;
+            borderRadius: 12px;
             border: 2px solid rgba(139, 92, 246, 0.5);
             background: rgba(139, 92, 246, 0.12);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             cursor: pointer;
             padding: 10px;
             gap: 4px;
-            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(139, 92, 246, 0.25);
           }
           .menu-toggle:hover {
             background: rgba(139, 92, 246, 0.2);
             border-color: rgba(167, 139, 250, 0.8);
             transform: scale(1.05);
-            box-shadow: 0 6px 25px rgba(139, 92, 246, 0.4);
-          }
-          :root.light-theme .menu-toggle {
-            border: 2px solid rgba(124, 58, 237, 0.5);
-            background: rgba(124, 58, 237, 0.1);
-            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.2);
-          }
-          :root.light-theme .menu-toggle:hover {
-            background: rgba(124, 58, 237, 0.2);
-            border-color: rgba(124, 58, 237, 0.8);
-            box-shadow: 0 6px 25px rgba(124, 58, 237, 0.35);
           }
           .menu-toggle span {
             display: block;
@@ -284,59 +341,99 @@ export default function Navbar() {
             box-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
             background: linear-gradient(90deg, #a78bfa, #8b5cf6);
           }
-          :root.light-theme .menu-toggle span {
-            box-shadow: 0 0 8px rgba(124, 58, 237, 0.5);
-          }
         }
         
-        /* Mobile Navbar Fixes - Compact */
         @media (max-width: 768px) {
           .site-header {
-            min-height: 52px;
+            min-height: auto;
+            padding: 10px 12px 0;
           }
-          .nav-shell-clone {
-            padding: 0.5rem 0.75rem !important;
+          .nav-shell {
+            height: 50px;
+            padding: 0 16px;
+            border-radius: 999px;
           }
-          .brand-mark-word {
-            font-size: 1.1rem !important;
-          }
-          .brand-mark-tag {
-            font-size: 0.55rem !important;
-            letter-spacing: 0.08em !important;
-          }
-          .nav-cta {
-            display: none !important;
-          }
+          .brand-mark-word { font-size: 1.3rem !important; }
           .menu-toggle {
-            width: 40px !important;
-            height: 40px !important;
+            width: 36px !important;
+            height: 36px !important;
             padding: 8px !important;
-            gap: 3px !important;
           }
           .menu-toggle span {
-            width: 20px !important;
+            width: 18px !important;
             height: 2px !important;
           }
-          .mobile-nav {
-            top: 52px !important;
-          }
-          .mobile-nav-link {
-            padding: 0.75rem 0 !important;
-            font-size: 1rem !important;
-          }
+        }
+
+        /* Mobile Drawer */
+        .mobile-drawer-backdrop {
+          position: fixed;
+          inset: 0;
+          z-index: 998;
+          background: rgba(0,0,0,0.6);
+          backdrop-filter: blur(4px);
+        }
+        .mobile-drawer {
+          position: fixed;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          width: min(300px, 82vw);
+          z-index: 999;
+          display: flex;
+          flex-direction: column;
+          overflow-y: auto;
+          box-shadow: -8px 0 40px rgba(0,0,0,0.5);
+        }
+        .mobile-drawer::-webkit-scrollbar { display: none; }
+        .mobile-drawer-content {
+          padding: 1.5rem;
+          flex: 1;
+        }
+        .mobile-theme-toggle {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 1rem 0;
+          margin-bottom: 1rem;
+          border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        :root.light-theme .mobile-theme-toggle {
+          border-bottom-color: rgba(0,0,0,0.08);
+        }
+        .mobile-nav-link {
+          display: block;
+          padding: 0.85rem 0;
+          font-size: 1.05rem;
+          font-weight: 500;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+          position: relative;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          transition: all 0.3s ease;
+        }
+        :root.light-theme .mobile-nav-link {
+          border-bottom-color: rgba(0,0,0,0.05);
+        }
+        .mobile-nav-link:hover {
+          padding-left: 10px;
+          color: #a78bfa;
+        }
+        .mobile-nav-link.is-active {
+          color: #a78bfa;
+          font-weight: 600;
         }
       `}</style>
 
       <motion.header 
-        className={`site-header ${scrolled ? 'is-scrolled' : ''}`} 
-        ref={menuRef}
+        className={`site-header ${scrolled ? 'is-scrolled' : ''}`}
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="container nav-shell nav-shell-clone">
+        <div className="container">
+          <div className="nav-shell">
 
-          {/* Animated Brand Logo */}
+          {/* Brand Logo */}
           <Link to="/" className="brand-mark" aria-label="YBEX home">
             <motion.div 
               className="brand-glow"
@@ -379,17 +476,9 @@ export default function Navbar() {
                 </motion.span>
               ))}
             </motion.span>
-            <motion.small 
-              className="brand-mark-tag"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5, duration: 0.4 }}
-            >
-              Creative Motion Studio
-            </motion.small>
           </Link>
 
-          {/* Desktop nav with magnetic effect */}
+          {/* Desktop nav */}
           <nav className="desktop-nav" aria-label="Primary navigation">
             {navItems.map((item, i) => (
               <motion.div
@@ -435,7 +524,7 @@ export default function Navbar() {
                     )}
                   </span>
                   
-                  {/* Hover glow background */}
+                  {/* Hover glow */}
                   <AnimatePresence>
                     {hoveredItem === item.path && (
                       <motion.div
@@ -459,9 +548,9 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Desktop CTA + Theme Toggle + Animated Hamburger */}
+          {/* Actions */}
           <div className="nav-actions">
-            {/* Theme Toggle Button */}
+            {/* Theme Toggle */}
             <motion.button
               type="button"
               className="theme-toggle-btn"
@@ -469,7 +558,7 @@ export default function Navbar() {
               aria-label={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.55, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 0.55, duration: 0.4 }}
               whileHover={{ scale: 1.1, rotate: theme === 'light' ? 180 : -180 }}
               whileTap={{ scale: 0.9 }}
             >
@@ -497,7 +586,7 @@ export default function Navbar() {
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.6, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 0.6, duration: 0.4 }}
             >
               <Link to="/get-started" className="button button-primary nav-cta">
                 <motion.span
@@ -510,7 +599,7 @@ export default function Navbar() {
               </Link>
             </motion.div>
             
-            {/* Mobile Menu Toggle - More visible with reduced spacing */}
+            {/* Mobile Menu Toggle */}
             <motion.button
               type="button"
               className="menu-toggle"
@@ -522,36 +611,13 @@ export default function Navbar() {
               transition={{ delay: 0.7, duration: 0.4 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              style={{
-                display: 'none', // Hidden on desktop
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '44px',
-                height: '44px',
-                borderRadius: '12px',
-                border: '2px solid rgba(228, 241, 65, 0.4)',
-                background: 'rgba(228, 241, 65, 0.1)',
-                backdropFilter: 'blur(10px)',
-                cursor: 'pointer',
-                padding: '10px',
-                gap: '4px',
-              }}
             >
               <motion.span 
                 animate={{
                   rotate: isOpen ? 45 : 0,
                   y: isOpen ? 6 : 0,
                 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                style={{ 
-                  display: 'block', 
-                  width: '22px', 
-                  height: '2.5px', 
-                  background: theme === 'light' ? '#1a1a1a' : '#E4F141',
-                  borderRadius: '3px',
-                  boxShadow: '0 0 8px rgba(228, 241, 65, 0.5)',
-                }}
+                transition={{ duration: 0.3 }}
               />
               <motion.span 
                 animate={{
@@ -559,69 +625,56 @@ export default function Navbar() {
                   scaleX: isOpen ? 0 : 1,
                 }}
                 transition={{ duration: 0.2 }}
-                style={{ 
-                  display: 'block', 
-                  width: '22px', 
-                  height: '2.5px', 
-                  background: theme === 'light' ? '#1a1a1a' : '#E4F141',
-                  borderRadius: '3px',
-                  boxShadow: '0 0 8px rgba(228, 241, 65, 0.5)',
-                  transformOrigin: 'center'
-                }}
               />
               <motion.span 
                 animate={{
                   rotate: isOpen ? -45 : 0,
                   y: isOpen ? -6 : 0,
                 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                style={{ 
-                  display: 'block', 
-                  width: '22px', 
-                  height: '2.5px', 
-                  background: theme === 'light' ? '#1a1a1a' : '#E4F141',
-                  borderRadius: '3px',
-                  boxShadow: '0 0 8px rgba(228, 241, 65, 0.5)',
-                }}
+                transition={{ duration: 0.3 }}
               />
             </motion.button>
           </div>
-        </div>
+          </div>{/* end nav-shell */}
+        </div>{/* end container */}
+      </motion.header>
 
-        {/* Mobile menu — Premium animated */}
-        <AnimatePresence>
-          {isOpen && (
+      {/* Mobile Drawer */}
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Backdrop */}
             <motion.div
-              className="mobile-nav"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="mobile-drawer-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={() => setIsOpen(false)}
+            />
+            
+            {/* Drawer */}
+            <motion.div
+              className="mobile-drawer"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               style={{
-                background: theme === 'light' ? 'rgba(250, 250, 250, 0.98)' : 'rgba(10, 10, 10, 0.95)',
+                background: theme === 'light' ? 'rgba(250, 250, 250, 0.98)' : 'rgba(10, 10, 10, 0.98)',
                 backdropFilter: 'blur(30px)',
-                WebkitBackdropFilter: 'blur(30px)',
-                borderTop: `1px solid ${theme === 'light' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'}`,
-                overflow: 'hidden',
               }}
             >
-              <div style={{ padding: '1.5rem' }}>
-                {/* Theme Toggle in Mobile Menu */}
+              <div className="mobile-drawer-content">
+                {/* Theme Toggle */}
                 <motion.div
-                  initial={{ opacity: 0, x: -30 }}
+                  className="mobile-theme-toggle"
+                  initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -30 }}
-                  transition={{ delay: 0, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '1rem 0',
-                    borderBottom: `1px solid ${theme === 'light' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)'}`,
-                  }}
+                  transition={{ delay: 0.1 }}
                 >
                   <span style={{ 
-                    fontSize: '1.1rem', 
+                    fontSize: '1rem', 
                     fontWeight: 500,
                     color: theme === 'light' ? '#1a1a1a' : '#fff'
                   }}>
@@ -635,7 +688,7 @@ export default function Navbar() {
                       border: 'none',
                       background: theme === 'light' ? 'rgba(124, 58, 237, 0.1)' : 'rgba(228, 241, 65, 0.15)',
                       color: theme === 'light' ? '#7c3aed' : '#E4F141',
-                      fontSize: '0.85rem',
+                      fontSize: '0.8rem',
                       fontWeight: 600,
                       cursor: 'pointer',
                     }}
@@ -644,39 +697,23 @@ export default function Navbar() {
                   </button>
                 </motion.div>
 
+                {/* Nav Links */}
                 {navItems.map((item, i) => (
                   <motion.div
                     key={item.path}
-                    initial={{ opacity: 0, x: -30 }}
+                    initial={{ opacity: 0, x: 30 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -30 }}
-                    transition={{ 
-                      delay: (i + 1) * 0.05, 
-                      duration: 0.3,
-                      ease: [0.22, 1, 0.36, 1]
-                    }}
+                    transition={{ delay: 0.15 + i * 0.05 }}
                   >
                     <Link
                       to={item.path}
                       className={`mobile-nav-link ${location.pathname === item.path ? 'is-active' : ''}`}
                       onClick={() => setIsOpen(false)}
                       style={{
-                        display: 'block',
-                        padding: '0.85rem 0',
-                        fontSize: '1.15rem',
-                        fontWeight: item.highlight ? 700 : 500,
-                        borderBottom: `1px solid ${theme === 'light' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)'}`,
-                        position: 'relative',
                         color: item.highlight ? '#e4f141' : (theme === 'light' ? '#1a1a1a' : '#fff'),
                       }}
                     >
-                      <motion.span
-                        whileHover={{ x: 10, color: theme === 'light' ? '#7c3aed' : '#E4F141' }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                        style={{ display: 'inline-block' }}
-                      >
-                        {item.label}
-                      </motion.span>
+                      {item.label}
                       {location.pathname === item.path && (
                         <motion.span
                           layoutId="mobileActive"
@@ -696,19 +733,16 @@ export default function Navbar() {
                   </motion.div>
                 ))}
                 
+                {/* CTA Button */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ 
-                    delay: navItems.length * 0.05 + 0.1, 
-                    duration: 0.3 
-                  }}
+                  transition={{ delay: 0.15 + navItems.length * 0.05 + 0.1 }}
                   style={{ marginTop: '1.5rem' }}
                 >
                   <Link
                     to="/get-started"
-                    className="button button-primary mobile-nav-cta"
+                    className="button button-primary"
                     onClick={() => setIsOpen(false)}
                     style={{
                       display: 'block',
@@ -717,20 +751,14 @@ export default function Navbar() {
                       fontSize: '1rem',
                     }}
                   >
-                    <motion.span
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      style={{ display: 'inline-block' }}
-                    >
-                      Start a Project →
-                    </motion.span>
+                    Start a Project →
                   </Link>
                 </motion.div>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.header>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }

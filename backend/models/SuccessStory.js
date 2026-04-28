@@ -10,7 +10,9 @@ const successStorySchema = new mongoose.Schema({
   imageUrl: { type: String, default: null },
   initials: { type: String, default: '' },
   isActive: { type: Boolean, default: true },
-  order: { type: Number, default: 0 }
+  order: { type: Number, default: 0 },
+  deletedAt: { type: Date, default: null },
+  deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model('SuccessStory', successStorySchema);

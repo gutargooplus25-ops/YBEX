@@ -78,7 +78,9 @@ const invoiceSchema = new mongoose.Schema({
     type: String,
     enum: ['generated', 'sent', 'paid', 'cancelled'],
     default: 'generated'
-  }
+  },
+  deletedAt: { type: Date, default: null },
+  deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Invoice', invoiceSchema);

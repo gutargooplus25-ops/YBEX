@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const { generateToken } = require('../utils/jwtHelper');
+const { logActivity } = require('../middleware/activityLogger');
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -37,6 +38,22 @@ const login = async (req, res, next) => {
     }
 
     const token = generateToken({ id: user._id });
+
+    // Log admin login activity
+    if (user.role === 'admin' || user.role === 'sub-admin' || user.role === 'super-admin') {
+      await logActivity({
+        req,
+        action: 'LOGIN',
+        entityType: 'AUTH',
+        entityId: user._id.toString(),
+        entityName: user.name,
+        details: {
+          role: user.role,
+          email: user.email,
+          loginType: 'admin'
+        }
+      });
+    }
 
     res.json({
       success: true,

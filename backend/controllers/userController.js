@@ -4,7 +4,7 @@ const User = require('../models/User');
 // @route   GET /api/users
 const getAllUsers = async (req, res, next) => {
   try {
-    const users = await User.find().select('-password');
+    const users = await User.find({ deletedAt: null }).select('-password');
     res.json({ success: true, count: users.length, users });
   } catch (error) {
     next(error);
@@ -45,9 +45,15 @@ const updateUser = async (req, res, next) => {
 // @route   DELETE /api/users/:id
 const deleteUser = async (req, res, next) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
-    res.json({ success: true, message: 'User deleted' });
+
+    // Soft delete
+    user.deletedAt = new Date();
+    user.deletedBy = req.user?._id;
+    await user.save();
+
+    res.json({ success: true, message: 'User moved to bin' });
   } catch (error) {
     next(error);
   }

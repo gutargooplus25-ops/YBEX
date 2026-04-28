@@ -11,6 +11,8 @@ const suggestionSchema = new mongoose.Schema(
       enum: ['pending', 'reviewed', 'implemented', 'rejected'],
       default: 'pending',
     },
+    deletedAt: { type: Date, default: null },
+    deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   },
   { timestamps: true }
 );

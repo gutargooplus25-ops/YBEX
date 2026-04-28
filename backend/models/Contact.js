@@ -16,6 +16,8 @@ const contactSchema = new mongoose.Schema(
     status:     { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
     adminReply: { type: String, default: '' },
     repliedAt:  { type: Date, default: null },
+    deletedAt: { type: Date, default: null },
+    deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   },
   { timestamps: true }
 );

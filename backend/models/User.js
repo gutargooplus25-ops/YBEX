@@ -9,6 +9,8 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ['user', 'sub-admin', 'super-admin', 'admin'], default: 'user' },
     isVerified: { type: Boolean, default: false },
     status: { type: [String], enum: ['school', 'pitch', 'sales', 'general'], default: [] },
+    deletedAt: { type: Date, default: null },
+    deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   },
   { timestamps: true }
 );
