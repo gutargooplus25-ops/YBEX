@@ -622,6 +622,20 @@ export default function Academy() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
 
+  // Scholarship Modal State
+  const [showScholarshipModal, setShowScholarshipModal] = useState(false);
+  const [scholarshipForm, setScholarshipForm] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    preferredTrack: '',
+    portfolioUrl: '',
+    reason: '',
+    background: ''
+  });
+  const [scholarshipSubmitting, setScholarshipSubmitting] = useState(false);
+  const [scholarshipSubmitted, setScholarshipSubmitted] = useState(false);
+
   // Fetch brands and success stories
   useEffect(() => {
     const fetchData = async () => {
@@ -651,6 +665,48 @@ export default function Academy() {
     setShowModal(false);
     setShowThankYou(false);
     setFormData({ fullName: '', email: '', phone: '', track: '', goals: '' });
+  };
+
+  const handleOpenScholarshipModal = () => {
+    setShowScholarshipModal(true);
+    setScholarshipSubmitted(false);
+    setScholarshipForm({
+      fullName: '',
+      email: '',
+      phone: '',
+      preferredTrack: '',
+      portfolioUrl: '',
+      reason: '',
+      background: ''
+    });
+  };
+
+  const handleCloseScholarshipModal = () => {
+    setShowScholarshipModal(false);
+    setScholarshipSubmitted(false);
+  };
+
+  const handleScholarshipInputChange = (e) => {
+    setScholarshipForm({ ...scholarshipForm, [e.target.name]: e.target.value });
+  };
+
+  const handleScholarshipSubmit = async (e) => {
+    e.preventDefault();
+    setScholarshipSubmitting(true);
+
+    try {
+      await axiosInstance.post('/scholarships/apply', scholarshipForm);
+      setScholarshipSubmitting(false);
+      setScholarshipSubmitted(true);
+
+      setTimeout(() => {
+        handleCloseScholarshipModal();
+      }, 4000);
+    } catch (error) {
+      console.error('Error submitting scholarship application:', error);
+      setScholarshipSubmitting(false);
+      alert('Failed to submit application. Please try again.');
+    }
   };
 
   const handleInputChange = (e) => {
@@ -1618,7 +1674,7 @@ export default function Academy() {
           </motion.p>
 
           <motion.button
-            onClick={() => handleApplyClick('scholarship')}
+            onClick={handleOpenScholarshipModal}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -2126,6 +2182,665 @@ export default function Academy() {
 
                     <p style={{ textAlign: 'center', fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', marginTop: '16px', letterSpacing: '0.05em' }}>
                       Admission and franchise data is securely processed.
+                    </p>
+                  </form>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── PREMIUM SCHOLARSHIP MODAL ── */}
+      <AnimatePresence>
+        {showScholarshipModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 1000,
+              background: 'rgba(0,0,0,0.92)',
+              backdropFilter: 'blur(20px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+            onClick={handleCloseScholarshipModal}
+          >
+            {/* Background Animated Gradient */}
+            <motion.div
+              animate={{
+                background: [
+                  'radial-gradient(ellipse at 20% 20%, rgba(255,77,0,0.15) 0%, transparent 50%)',
+                  'radial-gradient(ellipse at 80% 80%, rgba(255,77,0,0.15) 0%, transparent 50%)',
+                  'radial-gradient(ellipse at 20% 20%, rgba(255,77,0,0.15) 0%, transparent 50%)',
+                ],
+              }}
+              transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                pointerEvents: 'none',
+              }}
+            />
+
+            {/* Floating Particles */}
+            {[...Array(6)].map((_, i) => (
+              <motion.div
+                key={i}
+                animate={{
+                  y: [0, -30, 0],
+                  opacity: [0.3, 0.6, 0.3],
+                }}
+                transition={{
+                  duration: 3 + i * 0.5,
+                  repeat: Infinity,
+                  delay: i * 0.3,
+                  ease: 'easeInOut',
+                }}
+                style={{
+                  position: 'absolute',
+                  left: `${15 + i * 15}%`,
+                  top: `${20 + (i % 3) * 25}%`,
+                  width: '4px',
+                  height: '4px',
+                  borderRadius: '50%',
+                  background: '#ff6b35',
+                  boxShadow: '0 0 10px #ff6b35',
+                  pointerEvents: 'none',
+                }}
+              />
+            ))}
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85, y: 60 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 40 }}
+              transition={{ duration: 0.5, type: 'spring', stiffness: 300, damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '650px',
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                background: 'linear-gradient(145deg, #111 0%, #0a0a0a 100%)',
+                borderRadius: '28px',
+                border: '1px solid rgba(255,255,255,0.1)',
+                boxShadow: '0 50px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,77,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
+                position: 'relative',
+              }}
+            >
+              {/* Close Button */}
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleCloseScholarshipModal}
+                style={{
+                  position: 'absolute',
+                  top: '20px',
+                  right: '20px',
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: 'rgba(255,255,255,0.6)',
+                  fontSize: '1.25rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 10,
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                ✕
+              </motion.button>
+
+              {/* Success State */}
+              {scholarshipSubmitted ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, type: 'spring' }}
+                  style={{
+                    padding: '80px 40px',
+                    textAlign: 'center',
+                  }}
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.6, delay: 0.1, type: 'spring', stiffness: 200 }}
+                    style={{
+                      width: '120px',
+                      height: '120px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '4rem',
+                      margin: '0 auto 32px',
+                      boxShadow: '0 20px 60px rgba(34,197,94,0.4)',
+                    }}
+                  >
+                    ✓
+                  </motion.div>
+                  <motion.h3
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    style={{
+                      fontSize: '1.75rem',
+                      fontWeight: 800,
+                      color: '#fff',
+                      marginBottom: '16px',
+                    }}
+                  >
+                    Application Submitted!
+                  </motion.h3>
+                  <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    style={{
+                      fontSize: '1rem',
+                      color: 'rgba(255,255,255,0.6)',
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    Thank you for applying to the YBEX Talent Fund.<br />
+                    We&apos;ll review your application and contact you soon.
+                  </motion.p>
+                </motion.div>
+              ) : (
+                <>
+                  {/* Header */}
+                  <div style={{
+                    background: 'linear-gradient(135deg, #ff4d00 0%, #ff6b35 100%)',
+                    padding: '32px 40px',
+                    borderRadius: '28px 28px 0 0',
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}>
+                    {/* Decorative Elements */}
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+                      style={{
+                        position: 'absolute',
+                        top: '-50%',
+                        right: '-20%',
+                        width: '200px',
+                        height: '200px',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '50%',
+                      }}
+                    />
+                    <motion.div
+                      animate={{ rotate: -360 }}
+                      transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
+                      style={{
+                        position: 'absolute',
+                        bottom: '-30%',
+                        left: '-10%',
+                        width: '150px',
+                        height: '150px',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: '50%',
+                      }}
+                    />
+
+                    <div style={{ position: 'relative', zIndex: 2 }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '16px',
+                        marginBottom: '16px',
+                      }}>
+                        <div style={{
+                          width: '56px',
+                          height: '56px',
+                          borderRadius: '16px',
+                          background: 'rgba(255,255,255,0.2)',
+                          backdropFilter: 'blur(10px)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '1.75rem',
+                        }}>
+                          🎓
+                        </div>
+                        <div>
+                          <h3 style={{
+                            fontSize: '1.5rem',
+                            fontWeight: 800,
+                            color: '#fff',
+                            margin: 0,
+                            fontStyle: 'italic',
+                          }}>
+                            TALENT HUB
+                          </h3>
+                          <p style={{
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            color: 'rgba(255,255,255,0.8)',
+                            margin: '4px 0 0',
+                            letterSpacing: '0.15em',
+                            textTransform: 'uppercase',
+                          }}>
+                            YBEX SCHOLARSHIP PROGRAM
+                          </p>
+                        </div>
+                      </div>
+
+                      <div style={{
+                        background: 'rgba(0,0,0,0.3)',
+                        borderRadius: '12px',
+                        padding: '12px 16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                      }}>
+                        <span style={{ fontSize: '1.25rem' }}>💡</span>
+                        <p style={{
+                          fontSize: '0.75rem',
+                          color: 'rgba(255,255,255,0.9)',
+                          margin: 0,
+                          fontWeight: 500,
+                        }}>
+                          THE <strong style={{ color: '#fff' }}>TOP 10%</strong> OF CREATORS GET ACCESS TO FULL FUNDING. SHOWCASE YOUR SPARK.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Form */}
+                  <form onSubmit={handleScholarshipSubmit} style={{ padding: '32px 40px 40px' }}>
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: '20px',
+                      marginBottom: '20px',
+                    }}>
+                      {/* Full Name */}
+                      <div>
+                        <label style={{
+                          display: 'block',
+                          fontSize: '0.65rem',
+                          fontWeight: 700,
+                          color: 'rgba(255,255,255,0.4)',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.12em',
+                          marginBottom: '10px',
+                        }}>
+                          Full Name
+                        </label>
+                        <input
+                          type="text"
+                          name="fullName"
+                          value={scholarshipForm.fullName}
+                          onChange={handleScholarshipInputChange}
+                          placeholder="Enter your full name"
+                          required
+                          style={{
+                            width: '100%',
+                            padding: '16px 18px',
+                            borderRadius: '14px',
+                            background: 'rgba(0,0,0,0.4)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            color: '#fff',
+                            fontSize: '0.95rem',
+                            outline: 'none',
+                            transition: 'all 0.3s ease',
+                            boxSizing: 'border-box',
+                          }}
+                          onFocus={(e) => {
+                            e.target.style.borderColor = 'rgba(255,107,53,0.5)';
+                            e.target.style.boxShadow = '0 0 0 4px rgba(255,107,53,0.1)';
+                          }}
+                          onBlur={(e) => {
+                            e.target.style.borderColor = 'rgba(255,255,255,0.1)';
+                            e.target.style.boxShadow = 'none';
+                          }}
+                        />
+                      </div>
+
+                      {/* Email */}
+                      <div>
+                        <label style={{
+                          display: 'block',
+                          fontSize: '0.65rem',
+                          fontWeight: 700,
+                          color: 'rgba(255,255,255,0.4)',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.12em',
+                          marginBottom: '10px',
+                        }}>
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={scholarshipForm.email}
+                          onChange={handleScholarshipInputChange}
+                          placeholder="your@email.com"
+                          required
+                          style={{
+                            width: '100%',
+                            padding: '16px 18px',
+                            borderRadius: '14px',
+                            background: 'rgba(0,0,0,0.4)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            color: '#fff',
+                            fontSize: '0.95rem',
+                            outline: 'none',
+                            transition: 'all 0.3s ease',
+                            boxSizing: 'border-box',
+                          }}
+                          onFocus={(e) => {
+                            e.target.style.borderColor = 'rgba(255,107,53,0.5)';
+                            e.target.style.boxShadow = '0 0 0 4px rgba(255,107,53,0.1)';
+                          }}
+                          onBlur={(e) => {
+                            e.target.style.borderColor = 'rgba(255,255,255,0.1)';
+                            e.target.style.boxShadow = 'none';
+                          }}
+                        />
+                      </div>
+
+                      {/* Phone */}
+                      <div>
+                        <label style={{
+                          display: 'block',
+                          fontSize: '0.65rem',
+                          fontWeight: 700,
+                          color: 'rgba(255,255,255,0.4)',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.12em',
+                          marginBottom: '10px',
+                        }}>
+                          Phone / WhatsApp
+                        </label>
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={scholarshipForm.phone}
+                          onChange={handleScholarshipInputChange}
+                          placeholder="+91 00000 00000"
+                          required
+                          style={{
+                            width: '100%',
+                            padding: '16px 18px',
+                            borderRadius: '14px',
+                            background: 'rgba(0,0,0,0.4)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            color: '#fff',
+                            fontSize: '0.95rem',
+                            outline: 'none',
+                            transition: 'all 0.3s ease',
+                            boxSizing: 'border-box',
+                          }}
+                          onFocus={(e) => {
+                            e.target.style.borderColor = 'rgba(255,107,53,0.5)';
+                            e.target.style.boxShadow = '0 0 0 4px rgba(255,107,53,0.1)';
+                          }}
+                          onBlur={(e) => {
+                            e.target.style.borderColor = 'rgba(255,255,255,0.1)';
+                            e.target.style.boxShadow = 'none';
+                          }}
+                        />
+                      </div>
+
+                      {/* Preferred Track */}
+                      <div>
+                        <label style={{
+                          display: 'block',
+                          fontSize: '0.65rem',
+                          fontWeight: 700,
+                          color: 'rgba(255,255,255,0.4)',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.12em',
+                          marginBottom: '10px',
+                        }}>
+                          Preferred Track
+                        </label>
+                        <select
+                          name="preferredTrack"
+                          value={scholarshipForm.preferredTrack}
+                          onChange={handleScholarshipInputChange}
+                          required
+                          style={{
+                            width: '100%',
+                            padding: '16px 18px',
+                            borderRadius: '14px',
+                            background: 'rgba(0,0,0,0.4)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            color: scholarshipForm.preferredTrack ? '#fff' : 'rgba(255,255,255,0.4)',
+                            fontSize: '0.95rem',
+                            outline: 'none',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            boxSizing: 'border-box',
+                            appearance: 'none',
+                            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+                            backgroundRepeat: 'no-repeat',
+                            backgroundPosition: 'right 16px center',
+                          }}
+                          onFocus={(e) => {
+                            e.target.style.borderColor = 'rgba(255,107,53,0.5)';
+                          }}
+                          onBlur={(e) => {
+                            e.target.style.borderColor = 'rgba(255,255,255,0.1)';
+                          }}
+                        >
+                          <option value="">Select Track</option>
+                          <option value="Content Creation">🎬 Content Creation</option>
+                          <option value="Digital Marketing">📊 Digital Marketing</option>
+                          <option value="Both Tracks">🎯 Both Tracks</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Portfolio URL */}
+                    <div style={{ marginBottom: '20px' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        color: 'rgba(255,255,255,0.4)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.12em',
+                        marginBottom: '10px',
+                      }}>
+                        Portfolio / Profile URL (Optional)
+                      </label>
+                      <input
+                        type="url"
+                        name="portfolioUrl"
+                        value={scholarshipForm.portfolioUrl}
+                        onChange={handleScholarshipInputChange}
+                        placeholder="Link to your portfolio, social media, or work samples"
+                        style={{
+                          width: '100%',
+                          padding: '16px 18px',
+                          borderRadius: '14px',
+                          background: 'rgba(0,0,0,0.4)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          color: '#fff',
+                          fontSize: '0.95rem',
+                          outline: 'none',
+                          transition: 'all 0.3s ease',
+                          boxSizing: 'border-box',
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = 'rgba(255,107,53,0.5)';
+                          e.target.style.boxShadow = '0 0 0 4px rgba(255,107,53,0.1)';
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = 'rgba(255,255,255,0.1)';
+                          e.target.style.boxShadow = 'none';
+                        }}
+                      />
+                    </div>
+
+                    {/* Why You Deserve */}
+                    <div style={{ marginBottom: '20px' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        color: 'rgba(255,255,255,0.4)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.12em',
+                        marginBottom: '10px',
+                      }}>
+                        Why Do You Deserve This Opportunity? *
+                      </label>
+                      <textarea
+                        name="reason"
+                        value={scholarshipForm.reason}
+                        onChange={handleScholarshipInputChange}
+                        placeholder="Tell us about your spark, your passion, and why you deserve this scholarship..."
+                        rows={4}
+                        required
+                        style={{
+                          width: '100%',
+                          padding: '16px 18px',
+                          borderRadius: '14px',
+                          background: 'rgba(0,0,0,0.4)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          color: '#fff',
+                          fontSize: '0.95rem',
+                          outline: 'none',
+                          resize: 'vertical',
+                          fontFamily: 'inherit',
+                          transition: 'all 0.3s ease',
+                          boxSizing: 'border-box',
+                          lineHeight: 1.6,
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = 'rgba(255,107,53,0.5)';
+                          e.target.style.boxShadow = '0 0 0 4px rgba(255,107,53,0.1)';
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = 'rgba(255,255,255,0.1)';
+                          e.target.style.boxShadow = 'none';
+                        }}
+                      />
+                    </div>
+
+                    {/* Background */}
+                    <div style={{ marginBottom: '28px' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        color: 'rgba(255,255,255,0.4)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.12em',
+                        marginBottom: '10px',
+                      }}>
+                        Your Background (Briefly) *
+                      </label>
+                      <textarea
+                        name="background"
+                        value={scholarshipForm.background}
+                        onChange={handleScholarshipInputChange}
+                        placeholder="Tell us about your current journey, education, and experience..."
+                        rows={3}
+                        required
+                        style={{
+                          width: '100%',
+                          padding: '16px 18px',
+                          borderRadius: '14px',
+                          background: 'rgba(0,0,0,0.4)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          color: '#fff',
+                          fontSize: '0.95rem',
+                          outline: 'none',
+                          resize: 'vertical',
+                          fontFamily: 'inherit',
+                          transition: 'all 0.3s ease',
+                          boxSizing: 'border-box',
+                          lineHeight: 1.6,
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = 'rgba(255,107,53,0.5)';
+                          e.target.style.boxShadow = '0 0 0 4px rgba(255,107,53,0.1)';
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = 'rgba(255,255,255,0.1)';
+                          e.target.style.boxShadow = 'none';
+                        }}
+                      />
+                    </div>
+
+                    {/* Submit Button */}
+                    <motion.button
+                      type="submit"
+                      disabled={scholarshipSubmitting}
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      style={{
+                        width: '100%',
+                        padding: '18px',
+                        borderRadius: '14px',
+                        background: 'linear-gradient(135deg, #ff4d00, #ff6b35)',
+                        color: '#fff',
+                        fontWeight: 800,
+                        fontSize: '0.95rem',
+                        border: 'none',
+                        cursor: scholarshipSubmitting ? 'not-allowed' : 'pointer',
+                        boxShadow: '0 8px 32px rgba(255,77,0,0.4)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.15em',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px',
+                        opacity: scholarshipSubmitting ? 0.7 : 1,
+                        transition: 'all 0.3s ease',
+                      }}
+                    >
+                      {scholarshipSubmitting ? (
+                        <>
+                          <motion.span
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                            style={{ display: 'inline-block' }}
+                          >
+                            ⟳
+                          </motion.span>
+                          Submitting Application...
+                        </>
+                      ) : (
+                        <>
+                          Apply for Scholarship
+                          <motion.span
+                            animate={{ x: [0, 5, 0] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                          >
+                            →
+                          </motion.span>
+                        </>
+                      )}
+                    </motion.button>
+
+                    <p style={{
+                      textAlign: 'center',
+                      fontSize: '0.7rem',
+                      color: 'rgba(255,255,255,0.3)',
+                      marginTop: '20px',
+                      letterSpacing: '0.05em',
+                    }}>
+                      Scholarship applications are merit-based and reviewed by YBEX Academy Council.
                     </p>
                   </form>
                 </>

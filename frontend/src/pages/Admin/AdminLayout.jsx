@@ -42,13 +42,301 @@ function PageTransition({ children }) {
   );
 }
 
+/* ── Full Screen Admin Intro Animation ── */
+function AdminIntroAnimation({ onComplete }) {
+  // Generate random particles
+  const particles = Array.from({ length: 30 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    size: Math.random() * 4 + 1,
+    duration: Math.random() * 3 + 2,
+    delay: Math.random() * 2,
+  }));
+
+  return (
+    <motion.div
+      initial={{ opacity: 1 }}
+      animate={{ opacity: 0 }}
+      transition={{ delay: 2.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      onAnimationComplete={onComplete}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        background: '#050505',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Animated Background Gradient Orbs */}
+      <motion.div
+        animate={{
+          background: [
+            'radial-gradient(circle at 20% 30%, rgba(228,241,65,0.2) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(255,61,16,0.15) 0%, transparent 40%)',
+            'radial-gradient(circle at 70% 20%, rgba(228,241,65,0.2) 0%, transparent 40%), radial-gradient(circle at 30% 80%, rgba(255,61,16,0.15) 0%, transparent 40%)',
+            'radial-gradient(circle at 50% 50%, rgba(228,241,65,0.25) 0%, transparent 45%), radial-gradient(circle at 20% 80%, rgba(255,61,16,0.1) 0%, transparent 40%)',
+            'radial-gradient(circle at 20% 30%, rgba(228,241,65,0.2) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(255,61,16,0.15) 0%, transparent 40%)',
+          ],
+        }}
+        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ position: 'absolute', inset: 0 }}
+      />
+
+      {/* Animated Rings */}
+      {[0, 1, 2, 3].map((i) => (
+        <motion.div
+          key={i}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: [0, 1.5, 2], opacity: [0, 0.3, 0] }}
+          transition={{
+            duration: 3,
+            delay: i * 0.4,
+            repeat: Infinity,
+            ease: 'easeOut',
+          }}
+          style={{
+            position: 'absolute',
+            width: '400px',
+            height: '400px',
+            border: '1px solid rgba(228,241,65,0.3)',
+            borderRadius: '50%',
+          }}
+        />
+      ))}
+
+      {/* Floating Particles */}
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          initial={{ opacity: 0, y: '100vh' }}
+          animate={{
+            opacity: [0, 1, 1, 0],
+            y: ['100vh', '-10vh'],
+            x: [0, Math.random() * 100 - 50, 0],
+          }}
+          transition={{
+            duration: p.duration,
+            delay: p.delay,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+          style={{
+            position: 'absolute',
+            left: `${p.x}%`,
+            width: `${p.size}px`,
+            height: `${p.size}px`,
+            background: p.id % 2 === 0 ? '#E4F141' : '#FF3D10',
+            borderRadius: '50%',
+            boxShadow: `0 0 ${p.size * 2}px ${p.id % 2 === 0 ? '#E4F141' : '#FF3D10'}`,
+          }}
+        />
+      ))}
+
+      {/* Rotating Geometric Shapes */}
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+        style={{
+          position: 'absolute',
+          width: '600px',
+          height: '600px',
+          border: '1px dashed rgba(228,241,65,0.1)',
+          borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%',
+        }}
+      />
+      <motion.div
+        animate={{ rotate: -360 }}
+        transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
+        style={{
+          position: 'absolute',
+          width: '500px',
+          height: '500px',
+          border: '1px dashed rgba(255,61,16,0.1)',
+          borderRadius: '70% 30% 30% 70% / 70% 70% 30% 30%',
+        }}
+      />
+
+      {/* Grid Pattern */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundImage: `
+          linear-gradient(rgba(228,241,65,0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(228,241,65,0.03) 1px, transparent 1px)
+        `,
+        backgroundSize: '50px 50px',
+        opacity: 0.5,
+      }} />
+
+      {/* Scanline Effect */}
+      <motion.div
+        initial={{ top: '-10%' }}
+        animate={{ top: '110%' }}
+        transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          height: '2px',
+          background: 'linear-gradient(90deg, transparent, rgba(228,241,65,0.5), transparent)',
+          boxShadow: '0 0 20px rgba(228,241,65,0.5)',
+        }}
+      />
+      
+      {/* Central Content */}
+      <div style={{ position: 'relative', zIndex: 10, textAlign: 'center' }}>
+        {/* Logo Animation */}
+        <motion.div
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            width: '120px',
+            height: '120px',
+            margin: '0 auto 2rem',
+            background: 'linear-gradient(135deg, #FF3D10 0%, #E4F141 100%)',
+            borderRadius: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 0 60px rgba(228,241,65,0.4), 0 0 120px rgba(255,61,16,0.2)',
+          }}
+        >
+          <motion.span
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            style={{
+              fontSize: '3.5rem',
+              fontWeight: 900,
+              color: '#000',
+              fontFamily: C.font.display,
+            }}
+          >
+            A
+          </motion.span>
+        </motion.div>
+        
+        {/* Title Animation */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div style={{
+            fontSize: 'clamp(1.5rem, 5vw, 2.5rem)',
+            fontWeight: 800,
+            color: '#fff',
+            fontFamily: C.font.display,
+            letterSpacing: '0.05em',
+            marginBottom: '0.5rem',
+          }}>
+            ADMIN DASHBOARD
+          </div>
+        </motion.div>
+        
+        {/* Subtitle Animation */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.6 }}
+        >
+          <div style={{
+            fontSize: 'clamp(0.8rem, 2vw, 1rem)',
+            color: 'rgba(255,255,255,0.5)',
+            letterSpacing: '0.3em',
+            textTransform: 'uppercase',
+          }}>
+            Now Open
+          </div>
+        </motion.div>
+        
+        {/* Loading Bar */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+          style={{
+            marginTop: '3rem',
+            width: '200px',
+            height: '2px',
+            background: 'rgba(255,255,255,0.1)',
+            borderRadius: '2px',
+            overflow: 'hidden',
+            margin: '3rem auto 0',
+          }}
+        >
+          <motion.div
+            initial={{ width: '0%' }}
+            animate={{ width: '100%' }}
+            transition={{ delay: 1, duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              height: '100%',
+              background: 'linear-gradient(90deg, #FF3D10, #E4F141)',
+              borderRadius: '2px',
+            }}
+          />
+        </motion.div>
+      </div>
+      
+      {/* Corner Decorations */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        style={{
+          position: 'absolute',
+          top: '2rem',
+          left: '2rem',
+          fontSize: '0.75rem',
+          color: 'rgba(255,255,255,0.3)',
+          letterSpacing: '0.2em',
+        }}
+      >
+        YBEX COMMAND CENTER
+      </motion.div>
+      
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        style={{
+          position: 'absolute',
+          bottom: '2rem',
+          right: '2rem',
+          fontSize: '0.75rem',
+          color: 'rgba(255,255,255,0.3)',
+          letterSpacing: '0.2em',
+        }}
+      >
+        SECURE ACCESS
+      </motion.div>
+    </motion.div>
+  );
+}
+
 export default function AdminLayout({ children }) {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
   const navRef = useRef(null);
 
   const handleLogout = () => { logout(); navigate('/admin/login'); };
+
+  /* ── Show intro only on initial load/refresh ── */
+  useEffect(() => {
+    // Check if animation already played in this session
+    const hasPlayed = sessionStorage.getItem('adminIntroPlayed');
+    if (!hasPlayed) {
+      setShowIntro(true);
+      sessionStorage.setItem('adminIntroPlayed', 'true');
+    }
+  }, []);
 
   /* auto-scroll active tab into view */
   useEffect(() => {
@@ -56,8 +344,66 @@ export default function AdminLayout({ children }) {
     if (active) active.scrollIntoView({ inline: 'nearest', block: 'nearest', behavior: 'smooth' });
   });
 
+  /* ── Browser Tab Animation ── */
+  useEffect(() => {
+    const originalTitle = document.title;
+    const originalFavicon = document.querySelector('link[rel*="icon"]')?.getAttribute('href') || '/favicon.ico';
+    
+    // Create animated admin favicon (SVG data URI with pulsing effect)
+    const adminFavicon = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#FF3D10"/>
+          <stop offset="100%" style="stop-color:#E4F141"/>
+        </linearGradient>
+      </defs>
+      <rect width="100" height="100" rx="20" fill="url(#g)"/>
+      <text x="50" y="65" font-size="45" font-weight="900" text-anchor="middle" fill="#000">A</text>
+    </svg>`)}`;
+    
+    // Update favicon
+    let faviconLink = document.querySelector('link[rel*="icon"]');
+    if (!faviconLink) {
+      faviconLink = document.createElement('link');
+      faviconLink.rel = 'icon';
+      document.head.appendChild(faviconLink);
+    }
+    faviconLink.href = adminFavicon;
+    
+    // Animated title sequence
+    const titles = ['⚡ YBEX ADMIN', '🔴 ADMIN LIVE', '⚡ YBEX ADMIN', '🔴 DASHBOARD'];
+    let titleIndex = 0;
+    let blinkCount = 0;
+    const maxBlinks = 6; // Show animation for a few seconds then settle
+    
+    const titleInterval = setInterval(() => {
+      if (blinkCount < maxBlinks) {
+        document.title = titles[titleIndex % titles.length];
+        titleIndex++;
+        blinkCount++;
+      } else {
+        document.title = '🔴 YBEX Admin Dashboard';
+        clearInterval(titleInterval);
+      }
+    }, 400);
+    
+    // Cleanup on unmount
+    return () => {
+      clearInterval(titleInterval);
+      document.title = originalTitle;
+      faviconLink.href = originalFavicon;
+    };
+  }, []);
+
   return (
     <>
+      {/* Full Screen Intro Animation */}
+      <AnimatePresence>
+        {showIntro && (
+          <AdminIntroAnimation onComplete={() => setShowIntro(false)} />
+        )}
+      </AnimatePresence>
+      
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
         

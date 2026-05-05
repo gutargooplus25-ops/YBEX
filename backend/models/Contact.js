@@ -9,7 +9,7 @@ const contactSchema = new mongoose.Schema(
     message:  { type: String, required: true },
     category: {
       type: String,
-      enum: ['challenge', 'creators-school', 'pitch-ideas', 'sales-brand-growth', 'general'],
+      enum: ['challenge', 'creators-school', 'pitch-ideas', 'sales-brand-growth', 'general', 'scholarship'],
       default: 'general',
     },
     isRead:     { type: Boolean, default: false },
