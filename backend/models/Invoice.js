@@ -26,9 +26,18 @@ const invoiceSchema = new mongoose.Schema({
     type: String,
     default: 'INR'
   },
-  placeOfSupply: {
+  invoiceFor: {
     type: String,
-    default: null
+    enum: ['brand', 'influencer', ''],
+    default: ''
+  },
+  clientPhone: {
+    type: String,
+    default: ''
+  },
+  clientUpiId: {
+    type: String,
+    default: ''
   },
   billedBy: {
     name: { type: String, default: '' },

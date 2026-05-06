@@ -102,7 +102,8 @@ const steps = [
 
 // ─── Step 1 ───────────────────────────────────────────────────────────────────
 function Step1({ invoiceData, setInvoiceData }) {
-  // Auto-set due date to issue date + 10 days whenever issue date changes
+  const [showForOptions, setShowForOptions] = React.useState(false);
+
   const handleDateChange = (val) => {
     const due = val ? (() => {
       const d = new Date(val);
@@ -111,6 +112,15 @@ function Step1({ invoiceData, setInvoiceData }) {
     })() : '';
     setInvoiceData(p => ({ ...p, date: val, dueDate: due }));
   };
+
+  const selectFor = (type) => {
+    setInvoiceData(p => ({ ...p, invoiceFor: type }));
+    setShowForOptions(false);
+  };
+
+  const forLabel = invoiceData.invoiceFor === 'brand' ? '🏢 Brand'
+    : invoiceData.invoiceFor === 'influencer' ? '🌟 Influencer'
+    : 'Select type...';
 
   return (
     <div className="step-content">
@@ -148,8 +158,8 @@ function Step1({ invoiceData, setInvoiceData }) {
             </div>
           </div>
         </div>
+
         <div className="form-grid" style={{ marginTop: '20px' }}>
-         
           <div className="form-field">
             <label>CURRENCY</label>
             <select value={invoiceData.currency}
@@ -161,8 +171,87 @@ function Step1({ invoiceData, setInvoiceData }) {
               <option value="AED">AED (د.إ) - UAE Dirham</option>
             </select>
           </div>
+
+          {/* Invoice For selector — inside form, no overflow */}
+          <div className="form-field" style={{ position: 'relative' }}>
+            <label>INVOICE FOR <span style={{ fontSize: '0.58rem', color: 'rgba(255,255,255,0.35)', fontWeight: 400 }}>(brand or influencer?)</span></label>
+            <button
+              type="button"
+              onClick={() => setShowForOptions(v => !v)}
+              style={{
+                width: '100%', padding: '0.55rem 0.7rem',
+                background: 'rgba(255,255,255,0.05)',
+                border: `1px solid ${invoiceData.invoiceFor ? 'rgba(255,61,16,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                borderRadius: '8px',
+                color: invoiceData.invoiceFor ? '#fff' : 'rgba(255,255,255,0.4)',
+                fontSize: '0.875rem', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                transition: 'all 0.2s',
+              }}
+            >
+              <span>{forLabel}</span>
+              <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', transition: 'transform 0.25s', display: 'inline-block', transform: showForOptions ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
+            </button>
+
+            {/* Dropdown — rendered inline, not absolute, to avoid overflow */}
+            {showForOptions && (
+              <div style={{
+                marginTop: '6px',
+                background: 'rgba(18,12,30,0.99)',
+                border: '1px solid rgba(255,61,16,0.35)',
+                borderRadius: '10px', overflow: 'hidden',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                animation: 'step1DropIn 0.22s cubic-bezier(0.34,1.56,0.64,1)',
+              }}>
+                {[
+                  { key: 'brand', icon: '🏢', label: 'Brand', desc: 'Invoice for a brand / company' },
+                  { key: 'influencer', icon: '🌟', label: 'Influencer', desc: 'Invoice for an influencer / creator' },
+                ].map((opt, idx) => (
+                  <button key={opt.key} type="button" onClick={() => selectFor(opt.key)}
+                    style={{
+                      width: '100%', padding: '0.8rem 1rem',
+                      background: invoiceData.invoiceFor === opt.key ? 'rgba(255,61,16,0.18)' : 'transparent',
+                      border: 'none',
+                      borderBottom: idx === 0 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                      color: '#fff', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+                      display: 'flex', alignItems: 'center', gap: '12px', transition: 'background 0.15s',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,61,16,0.12)'}
+                    onMouseLeave={e => e.currentTarget.style.background = invoiceData.invoiceFor === opt.key ? 'rgba(255,61,16,0.18)' : 'transparent'}
+                  >
+                    <span style={{ fontSize: '1.3rem' }}>{opt.icon}</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{opt.label}</div>
+                      <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.38)' }}>{opt.desc}</div>
+                    </div>
+                    {invoiceData.invoiceFor === opt.key && <span style={{ color: '#FF3D10', fontWeight: 900 }}>✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Phone number — shown after selection */}
+        {invoiceData.invoiceFor && (
+          <div className="form-field" style={{ marginTop: '16px', animation: 'step1DropIn 0.3s cubic-bezier(0.34,1.56,0.64,1)' }}>
+            <label>{invoiceData.invoiceFor === 'brand' ? '🏢 BRAND PHONE NUMBER' : '🌟 INFLUENCER PHONE NUMBER'}</label>
+            <input
+              type="tel"
+              value={invoiceData.clientPhone || ''}
+              placeholder={invoiceData.invoiceFor === 'brand' ? 'Brand contact number' : 'Influencer phone number'}
+              onChange={e => setInvoiceData(p => ({ ...p, clientPhone: e.target.value }))}
+            />
+          </div>
+        )}
       </div>
+
+      <style>{`
+        @keyframes step1DropIn {
+          0%   { opacity: 0; transform: translateY(-8px) scale(0.97); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+      `}</style>
     </div>
   );
 }
@@ -1251,6 +1340,9 @@ function Step7({ invoiceData, subtotal, tax, grandTotal, previewRef }) {
       invoiceType:    invoiceData.invoiceType,
       currency:       invoiceData.currency,
       placeOfSupply:  invoiceData.placeOfSupply  || null,
+      invoiceFor:     invoiceData.invoiceFor     || '',
+      clientPhone:    invoiceData.clientPhone    || '',
+      clientUpiId:    invoiceData.bankDetails?.upiId || '',
       billedBy:       invoiceData.billedBy,
       billedTo:       invoiceData.billedTo,
       items: invoiceData.items.map(item => ({
@@ -1644,6 +1736,8 @@ const makeDefaultData = () => ({
   placeOfSupply:   '',
   gstPercent:      18,
   paymentMethod:   'skip',
+  invoiceFor:      '',
+  clientPhone:     '',
   billedBy: { name:'', address:'', pan:'', gstin:'', email:'', phone:'' },
   billedTo: { name:'', address:'', pan:'', gstin:'', email:'', phone:'' },
   items: [{ id: Date.now(), description:'', quantity:1, rate:0, amount:0 }],
