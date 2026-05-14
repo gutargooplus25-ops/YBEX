@@ -12,6 +12,7 @@ import Contact from './pages/Contact/Contact';
 import GetStarted from './pages/GetStarted/GetStarted';
 import Offerings from './pages/Offerings/Offerings';
 import Invoice from './pages/Invoice/Invoice';
+import InHouseTeam from './pages/Services/InHouseTeam';
 
 
 
@@ -55,6 +56,7 @@ export default function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/get-started" element={<GetStarted />} />
         <Route path="/invoice" element={<Invoice />} />
+        <Route path="/inhouse-team" element={<InHouseTeam />} />
       </Route>
 
       {/* ── Admin routes (NO Navbar/Footer) ── */}
