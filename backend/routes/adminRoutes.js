@@ -54,8 +54,18 @@ router.patch('/suggestions/:id',    updateAdminSuggestion);
 router.delete('/suggestions/:id',   deleteAdminSuggestion);
 
 // ── Team Members ──────────────────────────────────────────────────
-router.get('/team-members',        getTeamMembers);
-router.post('/team-members',       addTeamMember);
+router.get('/team-members', getTeamMembers);
+
+router.post('/team-members', (req, res, next) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) {
+      // Multer error (file too large, wrong type, etc.)
+      return res.status(400).json({ message: err.message || 'File upload error' });
+    }
+    next();
+  });
+}, addTeamMember);
+
 router.delete('/team-members/:id', deleteTeamMember);
 
 // ── Influencers ───────────────────────────────────────────────────

@@ -63,7 +63,7 @@ function MagneticLink({ children, to, className, isActive, onClick }) {
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled] = useState(() => typeof window !== 'undefined' && window.scrollY > 50);
   const [hoveredItem, setHoveredItem] = useState(null);
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
@@ -77,6 +77,11 @@ export default function Navbar() {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // Reset scroll state on route change so border hides at top of new page
+  useEffect(() => {
+    setScrolled(window.scrollY > 50);
+  }, [location.pathname]);
 
   // Close menu on route change
   useEffect(() => { setIsOpen(false); }, [location.pathname]);
@@ -118,77 +123,63 @@ export default function Navbar() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 0 24px;
-          height: 56px;
-          gap: 20px;
+          padding: 0 18px;
+          height: 44px;
+          gap: 16px;
           border-radius: 999px;
-          background: rgba(12, 8, 28, 0.75);
-          border: 1.5px solid rgba(139, 92, 246, 0.35);
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
-          box-shadow:
-            0 0 0 1px rgba(167, 139, 250, 0.08),
-            0 8px 32px rgba(0, 0, 0, 0.4),
-            0 0 60px rgba(124, 58, 237, 0.08),
-            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+          background: rgba(6, 4, 14, 0.55);
+          border: 1px solid transparent;
+          backdrop-filter: blur(0px);
+          -webkit-backdrop-filter: blur(0px);
+          box-shadow: none;
           transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
           position: relative;
         }
-        /* Animated gradient border glow */
+        /* No gradient border glow initially */
         .nav-shell::before {
           content: '';
           position: absolute;
           inset: -1px;
           border-radius: 999px;
-          background: linear-gradient(
-            135deg,
-            rgba(167, 139, 250, 0.5) 0%,
-            rgba(124, 58, 237, 0.3) 25%,
-            rgba(139, 92, 246, 0.1) 50%,
-            rgba(124, 58, 237, 0.3) 75%,
-            rgba(167, 139, 250, 0.5) 100%
-          );
-          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-          -webkit-mask-composite: xor;
-          mask-composite: exclude;
-          padding: 1.5px;
+          background: transparent;
           pointer-events: none;
-          opacity: 0.7;
+          opacity: 0;
           transition: opacity 0.4s ease;
         }
         .nav-shell:hover::before {
-          opacity: 1;
+          opacity: 0;
         }
-        /* Scrolled state - stronger glow */
+        /* Scrolled state — dark glass with black border */
         .site-header.is-scrolled .nav-shell {
-          background: rgba(8, 5, 20, 0.88);
-          border-color: rgba(139, 92, 246, 0.5);
+          background: rgba(4, 3, 10, 0.92);
+          border-color: rgba(0, 0, 0, 0.85);
+          backdrop-filter: blur(28px);
+          -webkit-backdrop-filter: blur(28px);
+          height: 40px;
           box-shadow:
-            0 0 0 1px rgba(167, 139, 250, 0.12),
-            0 12px 40px rgba(0, 0, 0, 0.5),
-            0 0 80px rgba(124, 58, 237, 0.12),
-            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            0 0 0 1px rgba(255, 255, 255, 0.04),
+            0 4px 24px rgba(0, 0, 0, 0.6),
+            0 1px 0 rgba(255, 255, 255, 0.03) inset;
         }
         :root.light-theme .nav-shell {
-          background: rgba(255, 255, 255, 0.88);
-          border-color: rgba(124, 58, 237, 0.25);
-          box-shadow:
-            0 0 0 1px rgba(124, 58, 237, 0.06),
-            0 8px 32px rgba(0, 0, 0, 0.1),
-            0 0 60px rgba(124, 58, 237, 0.06),
-            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+          background: rgba(255, 255, 255, 0.55);
+          border-color: transparent;
+          backdrop-filter: blur(0px);
+          -webkit-backdrop-filter: blur(0px);
+          box-shadow: none;
         }
         :root.light-theme .nav-shell::before {
-          background: linear-gradient(
-            135deg,
-            rgba(124, 58, 237, 0.4) 0%,
-            rgba(167, 139, 250, 0.2) 50%,
-            rgba(124, 58, 237, 0.4) 100%
-          );
+          background: transparent;
+          opacity: 0;
         }
         :root.light-theme .site-header.is-scrolled .nav-shell {
-          background: rgba(255, 255, 255, 0.95);
-          border-color: rgba(124, 58, 237, 0.35);
+          background: rgba(255, 255, 255, 0.96);
+          border-color: rgba(0, 0, 0, 0.12);
+          backdrop-filter: blur(28px);
+          -webkit-backdrop-filter: blur(28px);
+          box-shadow:
+            0 4px 24px rgba(0, 0, 0, 0.08),
+            0 1px 0 rgba(0, 0, 0, 0.04) inset;
         }
         .brand-mark {
           position: relative;
@@ -349,7 +340,7 @@ export default function Navbar() {
             padding: 10px 12px 0;
           }
           .nav-shell {
-            height: 50px;
+            height: 44px;
             padding: 0 16px;
             border-radius: 999px;
           }

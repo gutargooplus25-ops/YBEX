@@ -3,12 +3,24 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import {
-  aboutFounders,
   aboutJoinStrip,
-  aboutPowerhouse,
   aboutStats,
   aboutTimeline,
 } from '../content/siteData';
+
+// Resolve image URL — handles local /uploads/ paths and external URLs
+function resolveImg(url) {
+  if (!url) return null;
+  if (url.startsWith('/uploads/')) {
+    // On localhost: Vite proxies /uploads → backend:5000, so use path directly
+    // On IP access (mobile/LAN): point directly to backend port 5000
+    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+      return `http://${window.location.hostname}:5000${url}`;
+    }
+    return url; // Vite proxy handles it on localhost
+  }
+  return url;
+}
 
 /* ─── Hiring Application Modal ─────────────────────────────────────────────── */
 function HiringModal({ onClose }) {
@@ -239,18 +251,28 @@ function HiringModal({ onClose }) {
 export default function AboutStorySection() {
   const [viewCount, setViewCount] = useState(47804210);
   const [showHiringModal, setShowHiringModal] = useState(false);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [teamLoading, setTeamLoading] = useState(true);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setViewCount(prev => prev + 1);
     }, 3000);
-
     return () => clearInterval(interval);
   }, []);
 
-  const formatNumber = (num) => {
-    return num.toLocaleString();
-  };
+  useEffect(() => {
+    axiosInstance.get('/team-members')
+      .then((res) => setTeamMembers(res.data.members || []))
+      .catch(console.error)
+      .finally(() => setTeamLoading(false));
+  }, []);
+
+  const formatNumber = (num) => num.toLocaleString();
+
+  // Split by category
+  const founders   = teamMembers.filter((m) => m.coreTeam === 'Founder');
+  const powerhouse = teamMembers.filter((m) => m.coreTeam !== 'Founder');
 
   return (
     <>
@@ -360,24 +382,56 @@ export default function AboutStorySection() {
             </div>
           </motion.div>
 
-          <div className="team-grid founders-grid">
-            {aboutFounders.map((member, index) => (
-              <motion.article
-                key={member.name}
-                className="team-member"
-                initial={{ opacity: 0, y: 28 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.6, delay: index * 0.08 }}
-              >
-                <div className="team-photo">
-                  <img src={member.image} alt={member.name} loading="lazy" />
-                </div>
-                <h3>{member.name}</h3>
-                <p>{member.role}</p>
-              </motion.article>
-            ))}
-          </div>
+          {teamLoading ? (
+            <div className="team-grid founders-grid">
+              {[...Array(2)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  animate={{ opacity: [0.15, 0.35, 0.15] }}
+                  transition={{ duration: 1.6, repeat: Infinity, delay: i * 0.2 }}
+                  style={{ height: '320px', borderRadius: '16px', background: 'rgba(255,255,255,0.04)' }}
+                />
+              ))}
+            </div>
+          ) : founders.length > 0 ? (
+            <div className="team-grid founders-grid">
+              {founders.map((member, index) => (
+                <motion.article
+                  key={member._id}
+                  className="team-member"
+                  initial={{ opacity: 0, y: 28 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.6, delay: index * 0.08 }}
+                >
+                  <div className="team-photo">
+                    {resolveImg(member.imageUrl) ? (
+                      <img src={resolveImg(member.imageUrl)} alt={member.name} loading="lazy" />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', background: 'rgba(255,255,255,0.04)' }}>👤</div>
+                    )}
+                  </div>
+                  <h3>{member.name}</h3>
+                  <p>{member.role || member.coreTeam}</p>
+                  {member.socialLink && (
+                    <a
+                      href={member.socialLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="team-social-link"
+                      aria-label={`${member.name} social profile`}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                      </svg>
+                    </a>
+                  )}
+                </motion.article>
+              ))}
+            </div>
+          ) : null}
 
           <motion.div
             className="about-team-heading team-header-secondary"
@@ -391,24 +445,56 @@ export default function AboutStorySection() {
             </div>
           </motion.div>
 
-          <div className="team-grid team-grid-powerhouse">
-            {aboutPowerhouse.map((member, index) => (
-              <motion.article
-                key={member.name}
-                className="team-member"
-                initial={{ opacity: 0, y: 28 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.6, delay: index * 0.08 }}
-              >
-                <div className="team-photo">
-                  <img src={member.image} alt={member.name} loading="lazy" />
-                </div>
-                <h3>{member.name}</h3>
-                <p>{member.role}</p>
-              </motion.article>
-            ))}
-          </div>
+          {teamLoading ? (
+            <div className="team-grid team-grid-powerhouse">
+              {[...Array(3)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  animate={{ opacity: [0.15, 0.35, 0.15] }}
+                  transition={{ duration: 1.6, repeat: Infinity, delay: i * 0.2 }}
+                  style={{ height: '280px', borderRadius: '16px', background: 'rgba(255,255,255,0.04)' }}
+                />
+              ))}
+            </div>
+          ) : powerhouse.length > 0 ? (
+            <div className="team-grid team-grid-powerhouse">
+              {powerhouse.map((member, index) => (
+                <motion.article
+                  key={member._id}
+                  className="team-member"
+                  initial={{ opacity: 0, y: 28 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.6, delay: index * 0.08 }}
+                >
+                  <div className="team-photo">
+                    {resolveImg(member.imageUrl) ? (
+                      <img src={resolveImg(member.imageUrl)} alt={member.name} loading="lazy" />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', background: 'rgba(255,255,255,0.04)' }}>👤</div>
+                    )}
+                  </div>
+                  <h3>{member.name}</h3>
+                  <p>{member.role || member.coreTeam}</p>
+                  {member.socialLink && (
+                    <a
+                      href={member.socialLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="team-social-link"
+                      aria-label={`${member.name} social profile`}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                      </svg>
+                    </a>
+                  )}
+                </motion.article>
+              ))}
+            </div>
+          ) : null}
         </div>
       </section>
 

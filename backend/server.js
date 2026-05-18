@@ -73,6 +73,15 @@ app.get('/api/influencers', async (req, res) => {
   } catch (e) { res.status(500).json({ message: 'Server error' }); }
 });
 
+// Public team members endpoint (no auth required)
+const TeamMember = require('./models/TeamMember');
+app.get('/api/team-members', async (req, res) => {
+  try {
+    const members = await TeamMember.find({ deletedAt: null }).sort({ createdAt: 1 });
+    res.json({ success: true, members });
+  } catch (e) { res.status(500).json({ message: 'Server error' }); }
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });

@@ -15,6 +15,10 @@ export default defineConfig({
         target: 'http://127.0.0.1:5000',   // use IPv4 explicitly — avoids ::1 ECONNREFUSED on Node 18+
         changeOrigin: true,
       },
+      '/uploads': {
+        target: 'http://127.0.0.1:5000',   // proxy uploaded images to backend
+        changeOrigin: true,
+      },
     },
   },
 })

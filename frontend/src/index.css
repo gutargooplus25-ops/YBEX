@@ -4616,6 +4616,28 @@ img, video, iframe {
   font-size: 0.8rem;
 }
 
+.team-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.6rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(228, 241, 65, 0.08);
+  border: 1px solid rgba(228, 241, 65, 0.25);
+  color: rgba(228, 241, 65, 0.7);
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
+}
+
+.team-social-link:hover {
+  background: rgba(228, 241, 65, 0.18);
+  border-color: rgba(228, 241, 65, 0.6);
+  color: #e4f141;
+  transform: translateY(-2px);
+}
+
 .about-growth-logos {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

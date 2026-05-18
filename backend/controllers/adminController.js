@@ -383,12 +383,19 @@ const addTeamMember = async (req, res, next) => {
   try {
     const { name, role, coreTeam, socialLink, imageUrl } = req.body;
     if (!name?.trim()) return res.status(400).json({ message: 'Name is required' });
+
+    // If a file was uploaded, use its path; otherwise fall back to imageUrl from body
+    let finalImageUrl = imageUrl?.trim() || null;
+    if (req.file) {
+      finalImageUrl = `/uploads/${req.file.filename}`;
+    }
+
     const member = await TeamMember.create({
       name: name.trim(),
       role: role || '',
       coreTeam: coreTeam || 'Core Team',
       socialLink: socialLink || '',
-      imageUrl: imageUrl?.trim() || null,
+      imageUrl: finalImageUrl,
     });
 
     // Log activity
@@ -402,7 +409,10 @@ const addTeamMember = async (req, res, next) => {
     });
 
     res.status(201).json({ success: true, member });
-  } catch (e) { next(e); }
+  } catch (e) {
+    console.error('addTeamMember error:', e);
+    next(e);
+  }
 };
 
 const deleteTeamMember = async (req, res, next) => {
