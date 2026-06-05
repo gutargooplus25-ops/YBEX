@@ -123,8 +123,9 @@ export default function Navbar() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 0 28px;
-          height: 70px;
+          padding: 0 24px;
+          min-height: 96px;
+          height: auto;
           gap: 24px;
           border-radius: 999px;
           background: rgba(6, 4, 14, 0.55);
@@ -155,7 +156,8 @@ export default function Navbar() {
           border-color: rgba(0, 0, 0, 0.85);
           backdrop-filter: blur(28px);
           -webkit-backdrop-filter: blur(28px);
-          height: 65px;
+          min-height: 90px;
+          height: auto;
           box-shadow:
             0 0 0 1px rgba(255, 255, 255, 0.04),
             0 4px 24px rgba(0, 0, 0, 0.6),
@@ -188,13 +190,13 @@ export default function Navbar() {
           align-items: center;
           text-decoration: none;
           flex: 0 0 auto;
-          padding: 0 12px 0 0;
+          padding: 0;
           border-right: none;
-          margin-right: 24px;
+          margin: 0;
         }
         .brand-mark img {
           display: block;
-          height: 48px;
+          height: 84px;
           width: auto;
           object-fit: contain;
         }
@@ -213,19 +215,22 @@ export default function Navbar() {
         .nav-actions {
           display: flex;
           align-items: center;
-          gap: 16px;
+          gap: 24px;
           flex: 0 0 auto;
         }
         .desktop-nav {
           display: flex;
           align-items: center;
-          gap: 32px;
+          gap: 24px;
           margin-left: 0;
-          flex: 1;
+          flex: 1 1 auto;
+          min-width: 0;
           justify-content: center;
+          flex-wrap: nowrap;
         }
         .desktop-nav a {
           position: relative;
+          white-space: nowrap;
           overflow: visible;
           font-family: 'Plus Jakarta Sans', sans-serif;
           font-weight: 600;
@@ -356,7 +361,7 @@ export default function Navbar() {
             border-radius: 999px;
           }
           .brand-mark { font-size: 1.1rem !important; border-right: none; padding: 0 12px; }
-          .brand-mark img { height: 42px; }
+          .brand-mark img { height: 56px !important; max-height: 56px !important; }
           .menu-toggle {
             width: 36px !important;
             height: 36px !important;
@@ -451,7 +456,7 @@ export default function Navbar() {
               }}
             />
             <motion.img
-              src="/fgdfg.png"
+              src="/fgdfg%201.png"
               alt="YBEX logo"
               whileHover={{ scale: 1.03 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}

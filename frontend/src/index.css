@@ -114,6 +114,14 @@ button {
   gap: 14px;
 }
 
+.brand-mark img {
+  display: block;
+  width: auto;
+  height: 72px;
+  max-height: 72px;
+  object-fit: contain;
+}
+
 .brand-mark-badge {
   display: inline-flex;
   align-items: center;
@@ -2915,6 +2923,11 @@ img, video, iframe {
   .nav-shell-clone {
     min-height: 60px !important;
     border-radius: 16px !important;
+  }
+
+  .brand-mark img {
+    height: 52px !important;
+    max-height: 52px !important;
   }
 
   .brand-mark-badge {
