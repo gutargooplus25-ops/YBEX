@@ -4,8 +4,11 @@ import axios from 'axios';
 // - On PC (localhost): use Vite proxy → '/api'
 // - On mobile/other device (IP access): use same host IP with backend port 5000
 function getBaseURL() {
-  const envUrl = import.meta.env.VITE_API_URL;
+  let envUrl = import.meta.env.VITE_API_URL;
   if (envUrl && envUrl !== '/api') {
+    if (!envUrl.endsWith('/api') && !envUrl.endsWith('/api/')) {
+      envUrl = envUrl.endsWith('/') ? `${envUrl}api` : `${envUrl}/api`;
+    }
     return envUrl;
   }
   if (typeof window !== 'undefined') {
